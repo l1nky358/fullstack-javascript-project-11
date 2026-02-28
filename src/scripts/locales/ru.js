@@ -11,16 +11,23 @@ export default {
         loading: 'Загрузка...',
         success: 'RSS успешно добавлен!',
         error: 'Не удалось загрузить RSS поток. Проверьте ссылку.',
+        parseError: 'Ресурс не содержит валидный RSS',
       },
     },
     feeds: {
+      title: 'Фиды',
       empty: 'Пока нет добавленных RSS потоков',
-      posts: 'Последние посты:',
+    },
+    posts: {
+      title: 'Посты',
+      empty: 'Нет постов',
+      button: 'Просмотр',
     },
     errors: {
       required: 'Не должно быть пустым',
       invalidUrl: 'Ссылка должна быть валидным URL',
       duplicate: 'RSS поток уже добавлен',
+      network: 'Ошибка сети',
     },
   },
 };

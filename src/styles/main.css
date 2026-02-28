@@ -12,3 +12,12 @@
 .text-info {
     color: var(--bs-info);
 }
+
+.link-secondary {
+    color: var(--bs-secondary);
+    text-decoration: none;
+}
+
+.link-secondary:hover {
+    text-decoration: underline;
+}

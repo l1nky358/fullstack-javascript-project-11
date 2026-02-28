@@ -1,8 +1,11 @@
 import 'bootstrap';
 import * as yup from 'yup';
 import i18next from 'i18next';
+import axios from 'axios';
+import _uniqueId from 'lodash/uniqueId.js';
 import resources from './locales/index.js';
 import initView from './view.js';
+import parseRSS from './parser.js';
 
 class RssReader {
   constructor() {
@@ -11,6 +14,7 @@ class RssReader {
     this.feedback = document.getElementById('feedback');
     this.submitButton = document.getElementById('submit-button');
     this.feedsContainer = document.getElementById('feeds-container');
+    this.postsContainer = document.getElementById('posts-container');
     
     this.elements = {
       form: this.form,
@@ -18,6 +22,7 @@ class RssReader {
       feedback: this.feedback,
       submitButton: this.submitButton,
       feedsContainer: this.feedsContainer,
+      postsContainer: this.postsContainer,
     };
 
     this.state = {
@@ -27,6 +32,7 @@ class RssReader {
         valid: true,
       },
       feeds: [],
+      posts: [],
     };
 
     this.initI18n();
@@ -69,6 +75,17 @@ class RssReader {
         this.watchedState.form.valid = true;
       }
     });
+
+    this.postsContainer.addEventListener('click', (e) => {
+      if (e.target.dataset.bsTarget === '#postModal') {
+        const postId = e.target.dataset.postId;
+        const post = this.state.posts.find(p => p.id === postId);
+        if (post && !post.visited) {
+          post.visited = true;
+        }
+        this.showModal(post);
+      }
+    });
   }
 
   validateUrl(url) {
@@ -97,50 +114,70 @@ class RssReader {
   fetchRssFeed(url) {
     this.watchedState.form.process = 'sending';
     
-    return new Promise((resolve, reject) => {
-      const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}&disableCache=true`;
 
-      fetch(proxyUrl)
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Ошибка при загрузке RSS потока');
-          }
-          return response.json();
-        })
-        .then(data => {
-          const parser = new DOMParser();
-          const xml = parser.parseFromString(data.contents, 'text/xml');
-          
-          const items = xml.querySelectorAll('item');
-          const feedData = {
-            url,
-            title: xml.querySelector('channel > title')?.textContent || 'Без названия',
-            description: xml.querySelector('channel > description')?.textContent || '',
-            posts: Array.from(items).slice(0, 5).map(item => ({
-              title: item.querySelector('title')?.textContent || 'Без названия',
-              link: item.querySelector('link')?.textContent || '#',
-              description: item.querySelector('description')?.textContent || '',
-            })),
-          };
-          
-          this.watchedState.form.process = 'finished';
-          resolve(feedData);
-        })
-        .catch(() => {
-          this.watchedState.form.process = 'error';
+    return axios.get(proxyUrl)
+      .then(response => {
+        if (response.data?.contents) {
+          return response.data.contents;
+        }
+        throw new Error('network');
+      })
+      .then(data => {
+        try {
+          return parseRSS(data, url);
+        } catch (error) {
+          throw new Error('parseError');
+        }
+      })
+      .then(({ feed, posts }) => {
+        const feedId = _uniqueId('feed_');
+        const feedWithId = { ...feed, id: feedId };
+        
+        const postsWithIds = posts.map(post => ({
+          ...post,
+          id: _uniqueId('post_'),
+          feedId,
+          visited: false,
+        }));
+
+        this.watchedState.form.process = 'finished';
+        
+        return { feed: feedWithId, posts: postsWithIds };
+      })
+      .catch((error) => {
+        this.watchedState.form.process = 'error';
+        if (error.message === 'parseError') {
+          this.watchedState.form.error = 'form.feedback.parseError';
+        } else {
           this.watchedState.form.error = 'form.feedback.error';
-          reject(new Error('Ошибка загрузки'));
-        });
-    });
+        }
+        throw error;
+      });
   }
 
-  addFeed(feedData) {
-    this.watchedState.feeds.push(feedData);
+  addFeed({ feed, posts }) {
+    this.watchedState.feeds = [...this.watchedState.feeds, feed];
+    this.watchedState.posts = [...this.watchedState.posts, ...posts];
+    
     this.urlInput.value = '';
     this.watchedState.form.process = 'success';
     this.watchedState.form.error = null;
     this.watchedState.form.valid = true;
     this.urlInput.focus();
+  }
+
+  showModal(post) {
+    const modal = document.getElementById('postModal');
+    const modalTitle = document.getElementById('postModalLabel');
+    const modalBody = document.getElementById('postModalBody');
+    const modalLink = document.getElementById('postModalLink');
+    
+    if (modal && post) {
+      modalTitle.textContent = post.title;
+      modalBody.textContent = post.description;
+      modalLink.href = post.link;
+    }
   }
 
   handleSubmit() {
