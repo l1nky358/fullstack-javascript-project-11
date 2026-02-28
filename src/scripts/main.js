@@ -1,12 +1,34 @@
 import 'bootstrap';
+import * as yup from 'yup';
+import onChange from 'on-change';
 
 class RssReader {
   constructor() {
     this.form = document.getElementById('rss-form');
     this.urlInput = document.getElementById('rss-url');
     this.feedback = document.getElementById('feedback');
+    this.submitButton = document.getElementById('submit-button');
     this.feedsContainer = document.getElementById('feeds-container');
     this.feeds = [];
+
+    this.state = {
+      process: 'filling',
+      error: null,
+      valid: true
+    };
+
+    this.schema = yup.object().shape({
+      url: yup.string()
+        .url('Ссылка должна быть валидным URL')
+        .required('Не должно быть пустым')
+        .test('unique', 'RSS поток уже добавлен', (value) => {
+          return !this.feeds.some(feed => feed.url === value);
+        })
+    });
+
+    this.watchedState = onChange(this.state, () => {
+      this.render();
+    });
 
     this.init();
   }
@@ -16,37 +38,32 @@ class RssReader {
       e.preventDefault();
       this.handleSubmit();
     });
+
+    this.urlInput.addEventListener('input', () => {
+      if (this.watchedState.error) {
+        this.watchedState.error = null;
+        this.watchedState.valid = true;
+      }
+    });
   }
 
   validateUrl(url) {
-    return new Promise((resolve, reject) => {
-      try {
-        const urlObj = new URL(url);
-        if (urlObj.protocol !== 'http:' && urlObj.protocol !== 'https:') {
-          reject(new Error('Ссылка должна начинаться с http:// или https://'));
-        } else {
-          resolve(url);
-        }
-      } catch (error) {
-        reject(new Error('Введите корректный URL адрес'));
-      }
-    });
-  }
-
-  checkDuplicate(url) {
-    return new Promise((resolve, reject) => {
-      const isDuplicate = this.feeds.some(feed => feed.url === url);
-      if (isDuplicate) {
-        reject(new Error('RSS поток уже добавлен'));
-      } else {
-        resolve(url);
-      }
-    });
+    return this.schema.validate({ url }, { abortEarly: false })
+      .then(() => {
+        this.watchedState.error = null;
+        this.watchedState.valid = true;
+        return url;
+      })
+      .catch((err) => {
+        this.watchedState.error = err.errors[0];
+        this.watchedState.valid = false;
+        throw err;
+      });
   }
 
   fetchRssFeed(url) {
-    this.setFeedback('Загрузка...', 'info');
-
+    this.watchedState.process = 'sending';
+    
     return new Promise((resolve, reject) => {
       const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
 
@@ -73,9 +90,12 @@ class RssReader {
             })),
           };
           
+          this.watchedState.process = 'finished';
           resolve(feedData);
         })
         .catch(error => {
+          this.watchedState.process = 'error';
+          this.watchedState.error = 'Не удалось загрузить RSS поток. Проверьте ссылку.';
           reject(new Error('Не удалось загрузить RSS поток. Проверьте ссылку.'));
         });
     });
@@ -85,7 +105,10 @@ class RssReader {
     this.feeds.push(feedData);
     this.renderFeeds();
     this.urlInput.value = '';
-    this.setFeedback('RSS успешно добавлен!', 'success');
+    this.watchedState.process = 'filling';
+    this.watchedState.error = null;
+    this.watchedState.valid = true;
+    this.urlInput.focus();
   }
 
   renderFeeds() {
@@ -112,15 +135,33 @@ class RssReader {
     this.feedsContainer.innerHTML = feedsHtml || '<p class="text-center text-muted">Пока нет добавленных RSS потоков</p>';
   }
 
-  setFeedback(message, type) {
-    this.feedback.textContent = message;
-    this.feedback.className = `form-text feedback-${type}`;
-    
-    if (type === 'success') {
-      setTimeout(() => {
-        this.feedback.textContent = '';
-        this.feedback.className = 'form-text';
-      }, 3000);
+  render() {
+    if (this.watchedState.error) {
+      this.urlInput.classList.add('is-invalid');
+      this.feedback.textContent = this.watchedState.error;
+      this.feedback.classList.add('invalid-feedback');
+      this.feedback.classList.remove('text-success', 'text-info');
+    }
+     else {
+      this.urlInput.classList.remove('is-invalid');
+      this.feedback.textContent = '';
+      this.feedback.classList.remove('invalid-feedback');
+    }
+
+    if (this.watchedState.process === 'sending') {
+      this.submitButton.disabled = true;
+      this.feedback.textContent = 'Загрузка...';
+      this.feedback.classList.add('text-info');
+      this.feedback.classList.remove('invalid-feedback', 'text-success');
+    }
+     else if (this.watchedState.process === 'finished') {
+      this.submitButton.disabled = false;
+    }
+     else if (this.watchedState.process === 'error') {
+      this.submitButton.disabled = false;
+    }
+     else {
+      this.submitButton.disabled = false;
     }
   }
 
@@ -128,11 +169,10 @@ class RssReader {
     const url = this.urlInput.value.trim();
 
     this.validateUrl(url)
-      .then(validatedUrl => this.checkDuplicate(validatedUrl))
-      .then(uniqueUrl => this.fetchRssFeed(uniqueUrl))
+      .then(validatedUrl => this.fetchRssFeed(validatedUrl))
       .then(feedData => this.addFeed(feedData))
       .catch(error => {
-        this.setFeedback(error.message, 'error');
+        console.error(error);
       });
   }
 }

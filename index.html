@@ -15,16 +15,16 @@
                 
                 <form id="rss-form" class="mb-4">
                     <div class="mb-3">
-                        <label for="rss-url" class="form-label">Ссылка на RSS</label>
+                        <label for="rss-url" class="form-label">Ссылка RSS</label>
                         <div class="input-group">
                             <input 
-                                type="url" 
+                                type="text" 
                                 class="form-control" 
                                 id="rss-url" 
                                 placeholder="https://example.com/rss"
-                                required
+                                aria-describedby="feedback"
                             >
-                            <button type="submit" class="btn btn-primary">Добавить</button>
+                            <button type="submit" id="submit-button" class="btn btn-primary">Добавить</button>
                         </div>
                         <div id="feedback" class="form-text"></div>
                     </div>

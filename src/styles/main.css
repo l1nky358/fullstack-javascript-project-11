@@ -9,10 +9,6 @@
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
-.feedback-success {
-    color: var(--bs-success);
-}
-
-.feedback-error {
-    color: var(--bs-danger);
+.text-info {
+    color: var(--bs-info);
 }
