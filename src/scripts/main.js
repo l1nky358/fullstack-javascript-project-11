@@ -1,6 +1,8 @@
 import 'bootstrap';
 import * as yup from 'yup';
-import onChange from 'on-change';
+import i18next from 'i18next';
+import resources from './locales/index.js';
+import initView from './view.js';
 
 class RssReader {
   constructor() {
@@ -9,60 +11,91 @@ class RssReader {
     this.feedback = document.getElementById('feedback');
     this.submitButton = document.getElementById('submit-button');
     this.feedsContainer = document.getElementById('feeds-container');
-    this.feeds = [];
-
-    this.state = {
-      process: 'filling',
-      error: null,
-      valid: true
+    
+    this.elements = {
+      form: this.form,
+      urlInput: this.urlInput,
+      feedback: this.feedback,
+      submitButton: this.submitButton,
+      feedsContainer: this.feedsContainer,
     };
 
-    this.schema = yup.object().shape({
-      url: yup.string()
-        .url('Ссылка должна быть валидным URL')
-        .required('Не должно быть пустым')
-        .test('unique', 'RSS поток уже добавлен', (value) => {
-          return !this.feeds.some(feed => feed.url === value);
-        })
-    });
+    this.state = {
+      form: {
+        process: 'filling',
+        error: null,
+        valid: true,
+      },
+      feeds: [],
+    };
 
-    this.watchedState = onChange(this.state, () => {
-      this.render();
-    });
+    this.initI18n();
+  }
 
-    this.init();
+  initI18n() {
+    return i18next.init({
+      lng: 'ru',
+      debug: false,
+      resources,
+    }).then((t) => {
+      this.i18n = t;
+      this.initYupLocale();
+      this.init();
+    });
+  }
+
+  initYupLocale() {
+    yup.setLocale({
+      mixed: {
+        required: () => ({ key: 'errors.required' }),
+      },
+      string: {
+        url: () => ({ key: 'errors.invalidUrl' }),
+      },
+    });
   }
 
   init() {
+    this.watchedState = initView(this.state, this.elements, this.i18n);
+
     this.form.addEventListener('submit', (e) => {
       e.preventDefault();
       this.handleSubmit();
     });
 
     this.urlInput.addEventListener('input', () => {
-      if (this.watchedState.error) {
-        this.watchedState.error = null;
-        this.watchedState.valid = true;
+      if (this.watchedState.form.error) {
+        this.watchedState.form.error = null;
+        this.watchedState.form.valid = true;
       }
     });
   }
 
   validateUrl(url) {
-    return this.schema.validate({ url }, { abortEarly: false })
+    const schema = yup.object().shape({
+      url: yup.string()
+        .url()
+        .required()
+        .test('unique', { key: 'errors.duplicate' }, (value) => {
+          return !this.state.feeds.some(feed => feed.url === value);
+        })
+    });
+
+    return schema.validate({ url }, { abortEarly: false })
       .then(() => {
-        this.watchedState.error = null;
-        this.watchedState.valid = true;
+        this.watchedState.form.error = null;
+        this.watchedState.form.valid = true;
         return url;
       })
       .catch((err) => {
-        this.watchedState.error = err.errors[0];
-        this.watchedState.valid = false;
+        this.watchedState.form.error = err.errors[0].key;
+        this.watchedState.form.valid = false;
         throw err;
       });
   }
 
   fetchRssFeed(url) {
-    this.watchedState.process = 'sending';
+    this.watchedState.form.process = 'sending';
     
     return new Promise((resolve, reject) => {
       const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
@@ -90,79 +123,24 @@ class RssReader {
             })),
           };
           
-          this.watchedState.process = 'finished';
+          this.watchedState.form.process = 'finished';
           resolve(feedData);
         })
-        .catch(error => {
-          this.watchedState.process = 'error';
-          this.watchedState.error = 'Не удалось загрузить RSS поток. Проверьте ссылку.';
-          reject(new Error('Не удалось загрузить RSS поток. Проверьте ссылку.'));
+        .catch(() => {
+          this.watchedState.form.process = 'error';
+          this.watchedState.form.error = 'form.feedback.error';
+          reject(new Error('Ошибка загрузки'));
         });
     });
   }
 
   addFeed(feedData) {
-    this.feeds.push(feedData);
-    this.renderFeeds();
+    this.watchedState.feeds.push(feedData);
     this.urlInput.value = '';
-    this.watchedState.process = 'filling';
-    this.watchedState.error = null;
-    this.watchedState.valid = true;
+    this.watchedState.form.process = 'success';
+    this.watchedState.form.error = null;
+    this.watchedState.form.valid = true;
     this.urlInput.focus();
-  }
-
-  renderFeeds() {
-    const feedsHtml = this.feeds.map(feed => `
-      <div class="card mb-3 feeds-item">
-        <div class="card-body">
-          <h5 class="card-title">${feed.title}</h5>
-          <p class="card-text text-muted small">${feed.description}</p>
-          <h6 class="mt-3">Последние посты:</h6>
-          <ul class="list-unstyled">
-            ${feed.posts.map(post => `
-              <li class="mb-2">
-                <a href="${post.link}" target="_blank" class="text-decoration-none">
-                  ${post.title}
-                </a>
-                <small class="text-muted d-block">${post.description.substring(0, 100)}...</small>
-              </li>
-            `).join('')}
-          </ul>
-        </div>
-      </div>
-    `).join('');
-
-    this.feedsContainer.innerHTML = feedsHtml || '<p class="text-center text-muted">Пока нет добавленных RSS потоков</p>';
-  }
-
-  render() {
-    if (this.watchedState.error) {
-      this.urlInput.classList.add('is-invalid');
-      this.feedback.textContent = this.watchedState.error;
-      this.feedback.classList.add('invalid-feedback');
-      this.feedback.classList.remove('text-success', 'text-info');
-    }
-     else {
-      this.urlInput.classList.remove('is-invalid');
-      this.feedback.textContent = '';
-      this.feedback.classList.remove('invalid-feedback');
-    }
-
-    if (this.watchedState.process === 'sending') {
-      this.submitButton.disabled = true;
-      this.feedback.textContent = 'Загрузка...';
-      this.feedback.classList.add('text-info');
-      this.feedback.classList.remove('invalid-feedback', 'text-success');
-    }
-     else if (this.watchedState.process === 'finished') {
-      this.submitButton.disabled = false;
-    }
-     else if (this.watchedState.process === 'error') {
-      this.submitButton.disabled = false;
-    }
-     else {
-      this.submitButton.disabled = false;
-    }
   }
 
   handleSubmit() {
@@ -171,9 +149,7 @@ class RssReader {
     this.validateUrl(url)
       .then(validatedUrl => this.fetchRssFeed(validatedUrl))
       .then(feedData => this.addFeed(feedData))
-      .catch(error => {
-        console.error(error);
-      });
+      .catch(() => {});
   }
 }
 
