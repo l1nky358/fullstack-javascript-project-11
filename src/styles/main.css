@@ -1,0 +1,18 @@
+@import 'bootstrap/dist/css/bootstrap.min.css';
+
+.feeds-item {
+    transition: all 0.3s ease;
+}
+
+.feeds-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.feedback-success {
+    color: var(--bs-success);
+}
+
+.feedback-error {
+    color: var(--bs-danger);
+}
