@@ -159,7 +159,7 @@ class RssReader {
         }
       })
       .catch(error => {
-        console.error(`Error updating feed ${feed.url}:`, error);
+        console.error(error);
       });
   }
 
@@ -274,10 +274,15 @@ class RssReader {
   }
 }
 
+let app;
 document.addEventListener('DOMContentLoaded', () => {
-  const app = new RssReader();
+  app = new RssReader();
   
   window.addEventListener('beforeunload', () => {
-    app.destroy();
+    if (app) {
+      app.destroy();
+    }
   });
 });
+
+export default app;

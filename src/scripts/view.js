@@ -19,8 +19,6 @@ const render = (state, elements, i18n) => {
     feedback.textContent = i18n.t('form.feedback.loading');
     feedback.classList.add('text-info');
     feedback.classList.remove('invalid-feedback', 'text-success');
-  } else if (state.form.process === 'finished') {
-    submitButton.disabled = false;
   } else if (state.form.process === 'error') {
     submitButton.disabled = false;
   } else if (state.form.process === 'success') {

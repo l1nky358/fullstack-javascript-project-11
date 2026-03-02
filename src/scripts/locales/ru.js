@@ -9,18 +9,18 @@ export default {
       button: 'Добавить',
       feedback: {
         loading: 'Загрузка...',
-        success: 'RSS успешно добавлен!',
-        error: 'Не удалось загрузить RSS поток. Проверьте ссылку.',
+        success: 'RSS успешно загружен',
+        error: 'Ошибка сети',
         parseError: 'Ресурс не содержит валидный RSS',
       },
     },
     feeds: {
       title: 'Фиды',
-      empty: 'Пока нет добавленных RSS потоков',
+      empty: 'Фиды отсутствуют',
     },
     posts: {
       title: 'Посты',
-      empty: 'Нет постов',
+      empty: 'Посты отсутствуют',
       button: 'Просмотр',
     },
     modal: {
@@ -30,8 +30,7 @@ export default {
     errors: {
       required: 'Не должно быть пустым',
       invalidUrl: 'Ссылка должна быть валидным URL',
-      duplicate: 'RSS поток уже добавлен',
-      network: 'Ошибка сети',
+      duplicate: 'RSS уже существует',
     },
   },
 };
