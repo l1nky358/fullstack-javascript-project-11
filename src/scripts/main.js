@@ -33,7 +33,13 @@ class RssReader {
       },
       feeds: [],
       posts: [],
+      ui: {
+        visitedPosts: new Set(),
+      },
     };
+
+    this.updateTimeout = null;
+    this.updateInterval = 5000;
 
     this.initI18n();
   }
@@ -80,12 +86,70 @@ class RssReader {
       if (e.target.dataset.bsTarget === '#postModal') {
         const postId = e.target.dataset.postId;
         const post = this.state.posts.find(p => p.id === postId);
-        if (post && !post.visited) {
-          post.visited = true;
+        if (post) {
+          this.watchedState.ui.visitedPosts.add(postId);
         }
         this.showModal(post);
       }
     });
+  }
+
+  startUpdates() {
+    const update = () => {
+      if (this.state.feeds.length === 0) {
+        this.updateTimeout = setTimeout(update, this.updateInterval);
+        return;
+      }
+
+      Promise.all(this.state.feeds.map(feed => this.checkFeedUpdates(feed)))
+        .then(() => {
+          this.updateTimeout = setTimeout(update, this.updateInterval);
+        })
+        .catch(() => {
+          this.updateTimeout = setTimeout(update, this.updateInterval);
+        });
+    };
+
+    this.updateTimeout = setTimeout(update, this.updateInterval);
+  }
+
+  checkFeedUpdates(feed) {
+    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(feed.url)}&disableCache=true`;
+
+    return axios.get(proxyUrl)
+      .then(response => {
+        if (response.data?.contents) {
+          return response.data.contents;
+        }
+        throw new Error('network');
+      })
+      .then(data => {
+        try {
+          return parseRSS(data, feed.url);
+        } catch (error) {
+          throw new Error('parseError');
+        }
+      })
+      .then(({ posts }) => {
+        const existingPosts = this.state.posts.filter(p => p.feedId === feed.id);
+        const existingLinks = new Set(existingPosts.map(p => p.link));
+        
+        const newPosts = posts
+          .filter(post => !existingLinks.has(post.link))
+          .map(post => ({
+            ...post,
+            id: _uniqueId('post_'),
+            feedId: feed.id,
+            visited: false,
+          }));
+
+        if (newPosts.length > 0) {
+          this.watchedState.posts = [...this.watchedState.posts, ...newPosts];
+        }
+      })
+      .catch(error => {
+        console.error(`Error updating feed ${feed.url}:`, error);
+      });
   }
 
   validateUrl(url) {
@@ -165,6 +229,10 @@ class RssReader {
     this.watchedState.form.error = null;
     this.watchedState.form.valid = true;
     this.urlInput.focus();
+
+    if (!this.updateTimeout) {
+      this.startUpdates();
+    }
   }
 
   showModal(post) {
@@ -188,8 +256,19 @@ class RssReader {
       .then(feedData => this.addFeed(feedData))
       .catch(() => {});
   }
+
+  destroy() {
+    if (this.updateTimeout) {
+      clearTimeout(this.updateTimeout);
+      this.updateTimeout = null;
+    }
+  }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  new RssReader();
+  const app = new RssReader();
+  
+  window.addEventListener('beforeunload', () => {
+    app.destroy();
+  });
 });

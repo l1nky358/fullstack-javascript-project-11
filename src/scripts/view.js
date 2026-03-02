@@ -63,7 +63,7 @@ const render = (state, elements, i18n) => {
           : `<ul class="list-unstyled">
               ${state.posts.map(post => `
                 <li class="mb-2 d-flex justify-content-between align-items-center">
-                  <a href="${post.link}" target="_blank" rel="noopener noreferrer" class="${post.visited ? 'link-secondary' : 'fw-bold'}">
+                  <a href="${post.link}" target="_blank" rel="noopener noreferrer" class="${state.ui.visitedPosts.has(post.id) ? 'link-secondary' : 'fw-bold'}">
                     ${post.title}
                   </a>
                   <button 
