@@ -10,12 +10,12 @@
     <div class="container mt-5">
         <div class="row justify-content-center">
             <div class="col-md-8 col-lg-6">
-                <h1 class="text-center mb-4" data-i18n="app.title">RSS агрегатор</h1>
-                <p class="text-center text-muted mb-4" data-i18n="app.description">Начните читать RSS сегодня! Это легко, красиво и удобно.</p>
+                <h1 class="text-center mb-4">RSS агрегатор</h1>
+                <p class="text-center text-muted mb-4">Начните читать RSS сегодня! Это легко, красиво и удобно.</p>
                 
                 <form id="rss-form" class="mb-4">
                     <div class="mb-3">
-                        <label for="rss-url" class="form-label" data-i18n="form.label">Ссылка RSS</label>
+                        <label for="rss-url" class="form-label">Ссылка RSS</label>
                         <div class="input-group">
                             <input 
                                 type="text" 
@@ -25,7 +25,7 @@
                                 aria-describedby="feedback"
                                 autofocus
                             >
-                            <button type="submit" id="submit-button" class="btn btn-primary" data-i18n="form.button">Добавить</button>
+                            <button type="submit" id="submit-button" class="btn btn-primary">Добавить</button>
                         </div>
                         <div id="feedback" class="form-text"></div>
                     </div>
@@ -50,10 +50,10 @@
                     <h5 class="modal-title" id="postModalLabel"></h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body" id="postModalBody"></div>
+                <div class="modal-body"></div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
-                    <a href="#" id="postModalLink" class="btn btn-primary" target="_blank" rel="noopener noreferrer">Читать полностью</a>
+                    <a href="#" class="btn btn-primary" target="_blank" rel="noopener noreferrer">Читать полностью</a>
                 </div>
             </div>
         </div>

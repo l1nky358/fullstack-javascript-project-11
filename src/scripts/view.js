@@ -63,14 +63,17 @@ const render = (state, elements, i18n) => {
           : `<ul class="list-unstyled">
               ${state.posts.map(post => `
                 <li class="mb-2 d-flex justify-content-between align-items-center">
-                  <a href="${post.link}" target="_blank" rel="noopener noreferrer" class="${state.ui.visitedPosts.has(post.id) ? 'link-secondary' : 'fw-bold'}">
+                  <a 
+                    href="${post.link}" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    class="${state.ui.visitedPosts.has(post.id) ? '' : 'fw-bold'}"
+                  >
                     ${post.title}
                   </a>
                   <button 
                     type="button" 
                     class="btn btn-outline-primary btn-sm" 
-                    data-bs-toggle="modal" 
-                    data-bs-target="#postModal"
                     data-post-id="${post.id}"
                   >
                     ${i18n.t('posts.button')}

@@ -23,6 +23,10 @@ export default {
       empty: 'Нет постов',
       button: 'Просмотр',
     },
+    modal: {
+      close: 'Закрыть',
+      readFull: 'Читать полностью',
+    },
     errors: {
       required: 'Не должно быть пустым',
       invalidUrl: 'Ссылка должна быть валидным URL',

@@ -1,5 +1,9 @@
 @import 'bootstrap/dist/css/bootstrap.min.css';
 
+.text-info {
+    color: var(--bs-info);
+}
+
 .feeds-item {
     transition: all 0.3s ease;
 }
@@ -9,15 +13,14 @@
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
-.text-info {
-    color: var(--bs-info);
-}
-
-.link-secondary {
-    color: var(--bs-secondary);
+a {
     text-decoration: none;
 }
 
-.link-secondary:hover {
+a:hover {
     text-decoration: underline;
+}
+
+a.fw-bold {
+    font-weight: 700;
 }

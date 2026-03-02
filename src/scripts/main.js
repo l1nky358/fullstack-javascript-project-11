@@ -3,6 +3,7 @@ import * as yup from 'yup';
 import i18next from 'i18next';
 import axios from 'axios';
 import _uniqueId from 'lodash/uniqueId.js';
+import { Modal } from 'bootstrap';
 import resources from './locales/index.js';
 import initView from './view.js';
 import parseRSS from './parser.js';
@@ -15,6 +16,7 @@ class RssReader {
     this.submitButton = document.getElementById('submit-button');
     this.feedsContainer = document.getElementById('feeds-container');
     this.postsContainer = document.getElementById('posts-container');
+    this.modalElement = document.getElementById('postModal');
     
     this.elements = {
       form: this.form,
@@ -23,6 +25,7 @@ class RssReader {
       submitButton: this.submitButton,
       feedsContainer: this.feedsContainer,
       postsContainer: this.postsContainer,
+      modal: this.modalElement,
     };
 
     this.state = {
@@ -69,6 +72,7 @@ class RssReader {
 
   init() {
     this.watchedState = initView(this.state, this.elements, this.i18n);
+    this.modal = new Modal(this.modalElement);
 
     this.form.addEventListener('submit', (e) => {
       e.preventDefault();
@@ -83,15 +87,23 @@ class RssReader {
     });
 
     this.postsContainer.addEventListener('click', (e) => {
-      if (e.target.dataset.bsTarget === '#postModal') {
-        const postId = e.target.dataset.postId;
-        const post = this.state.posts.find(p => p.id === postId);
-        if (post) {
-          this.watchedState.ui.visitedPosts.add(postId);
-        }
-        this.showModal(post);
+      const button = e.target.closest('[data-post-id]');
+      if (button) {
+        const postId = button.dataset.postId;
+        this.handlePostClick(postId);
       }
     });
+  }
+
+  handlePostClick(postId) {
+    const post = this.state.posts.find(p => p.id === postId);
+    if (!post) return;
+
+    if (!this.state.ui.visitedPosts.has(postId)) {
+      this.watchedState.ui.visitedPosts.add(postId);
+    }
+
+    this.showModal(post);
   }
 
   startUpdates() {
@@ -140,7 +152,6 @@ class RssReader {
             ...post,
             id: _uniqueId('post_'),
             feedId: feed.id,
-            visited: false,
           }));
 
         if (newPosts.length > 0) {
@@ -202,7 +213,6 @@ class RssReader {
           ...post,
           id: _uniqueId('post_'),
           feedId,
-          visited: false,
         }));
 
         this.watchedState.form.process = 'finished';
@@ -236,16 +246,15 @@ class RssReader {
   }
 
   showModal(post) {
-    const modal = document.getElementById('postModal');
-    const modalTitle = document.getElementById('postModalLabel');
-    const modalBody = document.getElementById('postModalBody');
-    const modalLink = document.getElementById('postModalLink');
+    const modalTitle = this.modalElement.querySelector('.modal-title');
+    const modalBody = this.modalElement.querySelector('.modal-body');
+    const modalLink = this.modalElement.querySelector('.modal-footer a');
     
-    if (modal && post) {
-      modalTitle.textContent = post.title;
-      modalBody.textContent = post.description;
-      modalLink.href = post.link;
-    }
+    modalTitle.textContent = post.title;
+    modalBody.textContent = post.description;
+    modalLink.href = post.link;
+    
+    this.modal.show();
   }
 
   handleSubmit() {
