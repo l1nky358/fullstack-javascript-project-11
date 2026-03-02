@@ -72,7 +72,9 @@ const render = (state, elements, i18n) => {
                   <button 
                     type="button" 
                     class="btn btn-outline-primary btn-sm" 
-                    data-post-id="${post.id}"
+                    data-id="${post.id}"
+                    data-bs-toggle="modal"
+                    data-bs-target="#modal"
                   >
                     ${i18n.t('posts.button')}
                   </button>
