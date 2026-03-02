@@ -35,16 +35,17 @@ const render = (state, elements, i18n) => {
     submitButton.disabled = false;
   }
 
+  // Фиды
   const feedsHtml = `
-    <div class="card mb-3">
+    <div class="card mb-3 feeds">
       <div class="card-body">
         <h2 class="card-title h5">${i18n.t('feeds.title')}</h2>
         ${state.feeds.length === 0 
-          ? `<p class="text-muted">${i18n.t('feeds.empty')}</p>`
+          ? `<p>${i18n.t('feeds.empty')}</p>`
           : state.feeds.map(feed => `
             <div class="mb-3">
               <h3 class="h6 fw-bold">${feed.title}</h3>
-              <p class="text-muted small">${feed.description}</p>
+              <p>${feed.description}</p>
             </div>
           `).join('')
         }
@@ -52,20 +53,21 @@ const render = (state, elements, i18n) => {
     </div>
   `;
 
+  // Посты
   const postsHtml = `
-    <div class="card">
+    <div class="card posts">
       <div class="card-body">
         <h2 class="card-title h5">${i18n.t('posts.title')}</h2>
         ${state.posts.length === 0
-          ? `<p class="text-muted">${i18n.t('posts.empty')}</p>`
+          ? `<p>${i18n.t('posts.empty')}</p>`
           : `<ul class="list-unstyled">
               ${state.posts.map(post => `
-                <li class="mb-2 d-flex justify-content-between align-items-center">
+                <li class="mb-2 d-flex justify-content-between align-items-start">
                   <a 
                     href="${post.link}" 
                     target="_blank" 
                     rel="noopener noreferrer" 
-                    class="${state.ui.visitedPosts.has(post.id) ? '' : 'fw-bold'}"
+                    class="${state.ui.visitedPosts.has(post.id) ? 'fw-normal' : 'fw-bold'}"
                   >
                     ${post.title}
                   </a>
