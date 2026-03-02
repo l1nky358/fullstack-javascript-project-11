@@ -16,7 +16,7 @@ class RssReader {
     this.submitButton = document.getElementById('submit-button');
     this.feedsContainer = document.getElementById('feeds-container');
     this.postsContainer = document.getElementById('posts-container');
-    this.modalElement = document.getElementById('postModal');
+    this.modalElement = document.getElementById('modal');
     
     this.elements = {
       form: this.form,
@@ -87,9 +87,9 @@ class RssReader {
     });
 
     this.postsContainer.addEventListener('click', (e) => {
-      const button = e.target.closest('[data-post-id]');
+      const button = e.target.closest('[data-id]');
       if (button) {
-        const postId = button.dataset.postId;
+        const postId = button.dataset.id;
         this.handlePostClick(postId);
       }
     });
