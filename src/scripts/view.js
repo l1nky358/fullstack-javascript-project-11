@@ -1,10 +1,11 @@
 import onChange from 'on-change';
 
 const render = (state, elements, i18n) => {
-  const { form, feedback, urlInput, submitButton, feedsContainer, postsContainer } = elements;
+  const { feedback, urlInput, submitButton, feedsContainer, postsContainer } = elements;
 
+  // Очищаем классы
   urlInput.classList.remove('is-invalid');
-  feedback.classList.remove('invalid-feedback', 'text-success', 'text-info');
+  feedback.className = 'feedback';
   feedback.textContent = '';
 
   if (state.form.error) {
@@ -30,6 +31,7 @@ const render = (state, elements, i18n) => {
     submitButton.disabled = false;
   }
 
+  // Фиды
   const feedsHtml = `
     <div class="card mb-3">
       <div class="card-body">
@@ -47,6 +49,7 @@ const render = (state, elements, i18n) => {
     </div>
   `;
 
+  // Посты
   const postsHtml = `
     <div class="card">
       <div class="card-body">
