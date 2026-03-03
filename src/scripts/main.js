@@ -32,7 +32,6 @@ class RssReader {
       form: {
         process: 'filling',
         error: null,
-        valid: true,
       },
       feeds: [],
       posts: [],
@@ -62,10 +61,10 @@ class RssReader {
   initYupLocale() {
     yup.setLocale({
       mixed: {
-        required: () => ({ key: 'errors.required' }),
+        required: 'errors.required',
       },
       string: {
-        url: () => ({ key: 'errors.invalidUrl' }),
+        url: 'errors.invalidUrl',
       },
     });
   }
@@ -82,7 +81,6 @@ class RssReader {
     this.urlInput.addEventListener('input', () => {
       if (this.watchedState.form.error) {
         this.watchedState.form.error = null;
-        this.watchedState.form.valid = true;
       }
     });
 
@@ -168,7 +166,7 @@ class RssReader {
       url: yup.string()
         .url()
         .required()
-        .test('unique', { key: 'errors.duplicate' }, (value) => {
+        .test('unique', 'errors.duplicate', (value) => {
           return !this.state.feeds.some(feed => feed.url === value);
         })
     });
@@ -176,12 +174,10 @@ class RssReader {
     return schema.validate({ url }, { abortEarly: false })
       .then(() => {
         this.watchedState.form.error = null;
-        this.watchedState.form.valid = true;
         return url;
       })
       .catch((err) => {
-        this.watchedState.form.error = err.errors[0].key;
-        this.watchedState.form.valid = false;
+        this.watchedState.form.error = err.errors[0];
         throw err;
       });
   }
@@ -237,7 +233,6 @@ class RssReader {
     this.urlInput.value = '';
     this.watchedState.form.process = 'success';
     this.watchedState.form.error = null;
-    this.watchedState.form.valid = true;
     this.urlInput.focus();
 
     if (!this.updateTimeout) {
