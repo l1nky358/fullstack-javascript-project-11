@@ -196,7 +196,8 @@ class RssReader {
       })
       .then(data => {
         try {
-          return parseRSS(data, url);
+          const parsed = parseRSS(data, url);
+          return parsed;
         } catch (error) {
           throw new Error('parseError');
         }
