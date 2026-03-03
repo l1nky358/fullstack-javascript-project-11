@@ -3,41 +3,35 @@ import onChange from 'on-change';
 const render = (state, elements, i18n) => {
   const { form, feedback, urlInput, submitButton, feedsContainer, postsContainer } = elements;
 
+  urlInput.classList.remove('is-invalid');
+  feedback.classList.remove('invalid-feedback', 'text-success', 'text-info');
+  feedback.textContent = '';
+
   if (state.form.error) {
     urlInput.classList.add('is-invalid');
-    feedback.textContent = i18n.t(state.form.error);
     feedback.classList.add('invalid-feedback');
-    feedback.classList.remove('text-success', 'text-info');
-  } else {
-    urlInput.classList.remove('is-invalid');
-    feedback.textContent = '';
-    feedback.classList.remove('invalid-feedback');
-  }
-
-  if (state.form.process === 'sending') {
+    feedback.textContent = i18n.t(state.form.error);
+  } else if (state.form.process === 'sending') {
     submitButton.disabled = true;
-    feedback.textContent = i18n.t('form.feedback.loading');
     feedback.classList.add('text-info');
-    feedback.classList.remove('invalid-feedback', 'text-success');
+    feedback.textContent = i18n.t('form.feedback.loading');
   } else if (state.form.process === 'error') {
     submitButton.disabled = false;
   } else if (state.form.process === 'success') {
     submitButton.disabled = false;
-    feedback.textContent = i18n.t('form.feedback.success');
     feedback.classList.add('text-success');
-    feedback.classList.remove('invalid-feedback', 'text-info');
+    feedback.textContent = i18n.t('form.feedback.success');
     
     setTimeout(() => {
       feedback.textContent = '';
       feedback.classList.remove('text-success');
     }, 3000);
-  } else {
+  } else if (state.form.process === 'filling') {
     submitButton.disabled = false;
   }
 
-  // Фиды
   const feedsHtml = `
-    <div class="card mb-3 feeds">
+    <div class="card mb-3">
       <div class="card-body">
         <h2 class="card-title h5">${i18n.t('feeds.title')}</h2>
         ${state.feeds.length === 0 
@@ -53,9 +47,8 @@ const render = (state, elements, i18n) => {
     </div>
   `;
 
-  // Посты
   const postsHtml = `
-    <div class="card posts">
+    <div class="card">
       <div class="card-body">
         <h2 class="card-title h5">${i18n.t('posts.title')}</h2>
         ${state.posts.length === 0
