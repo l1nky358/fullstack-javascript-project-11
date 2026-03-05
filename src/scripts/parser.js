@@ -4,7 +4,8 @@ const parseRSS = (data, url) => {
   
   const parseError = xml.querySelector('parsererror');
   if (parseError) {
-    throw new Error('parseError');
+    console.error('Parse error:', parseError.textContent);
+    throw new Error('noRss');
   }
 
   const feedTitle = xml.querySelector('channel > title')?.textContent?.trim() || 'Без названия';
@@ -16,6 +17,8 @@ const parseRSS = (data, url) => {
     link: item.querySelector('link')?.textContent?.trim() || '#',
     description: item.querySelector('description')?.textContent?.trim() || '',
   }));
+
+  console.log('Parsed feed:', { feedTitle, feedDescription, postsCount: posts.length });
 
   return {
     feed: {
