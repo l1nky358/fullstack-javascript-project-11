@@ -15,7 +15,6 @@ const parseRSS = (data, url) => {
     title: item.querySelector('title')?.textContent?.trim() || 'Без названия',
     link: item.querySelector('link')?.textContent?.trim() || '#',
     description: item.querySelector('description')?.textContent?.trim() || '',
-    pubDate: item.querySelector('pubDate')?.textContent || '',
   }));
 
   return {
