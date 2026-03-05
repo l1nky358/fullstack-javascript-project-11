@@ -19,13 +19,11 @@ class RssReader {
     this.modalElement = document.getElementById('modal');
     
     this.elements = {
-      form: this.form,
-      urlInput: this.urlInput,
       feedback: this.feedback,
+      urlInput: this.urlInput,
       submitButton: this.submitButton,
       feedsContainer: this.feedsContainer,
       postsContainer: this.postsContainer,
-      modal: this.modalElement,
     };
 
     this.state = {
@@ -235,10 +233,8 @@ class RssReader {
     this.watchedState.posts = [...this.watchedState.posts, ...posts];
     
     this.urlInput.value = '';
-    
     this.watchedState.form.process = 'success';
     this.watchedState.form.error = null;
-    
     this.urlInput.focus();
 
     if (!this.updateTimeout) {
@@ -247,6 +243,7 @@ class RssReader {
 
     setTimeout(() => {
       this.watchedState.form.process = 'filling';
+      this.watchedState.form.error = null;
     }, 3000);
   }
 
