@@ -212,7 +212,7 @@ class RssReader {
           feedId,
         }));
 
-        this.watchedState.form.process = 'finished';
+        this.watchedState.form.process = 'success';
         
         return { feed: feedWithId, posts: postsWithIds };
       })
