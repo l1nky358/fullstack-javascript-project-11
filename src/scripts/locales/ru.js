@@ -10,8 +10,10 @@ export default {
       feedback: {
         loading: 'Загрузка...',
         success: 'RSS успешно загружен',
-        error: 'Ошибка сети',
-        parseError: 'Ресурс не содержит валидный RSS',
+        network: 'Ошибка сети',
+        noRss: 'Ресурс не содержит валидный RSS',
+        invalidUrl: 'Ссылка должна быть валидным URL',
+        exists: 'RSS уже существует',
       },
     },
     feeds: {
@@ -26,11 +28,6 @@ export default {
     modal: {
       close: 'Закрыть',
       readFull: 'Читать полностью',
-    },
-    errors: {
-      required: 'Не должно быть пустым',
-      invalidUrl: 'Ссылка должна быть валидным URL',
-      duplicate: 'RSS уже существует',
     },
   },
 };
