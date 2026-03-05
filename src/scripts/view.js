@@ -3,35 +3,51 @@ import onChange from 'on-change';
 const render = (state, elements, i18n) => {
   const { feedback, urlInput, submitButton, feedsContainer, postsContainer } = elements;
 
-  // Очищаем классы
   urlInput.classList.remove('is-invalid');
   feedback.className = 'feedback';
   feedback.textContent = '';
 
-  if (state.form.error) {
-    urlInput.classList.add('is-invalid');
-    feedback.classList.add('invalid-feedback');
-    feedback.textContent = i18n.t(state.form.error);
-  } else if (state.form.process === 'sending') {
+  if (state.form.process === 'sending') {
     submitButton.disabled = true;
     feedback.classList.add('text-info');
     feedback.textContent = i18n.t('form.feedback.loading');
-  } else if (state.form.process === 'error') {
+  }
+  else if (state.form.process === 'error' || state.form.error) {
     submitButton.disabled = false;
-  } else if (state.form.process === 'success') {
+    urlInput.classList.add('is-invalid');
+    
+    if (state.form.error === 'network') {
+      feedback.classList.add('text-danger');
+      feedback.textContent = i18n.t('form.feedback.network');
+    }
+    else if (state.form.error) {
+      feedback.classList.add('text-danger');
+      feedback.textContent = i18n.t(state.form.error);
+    }
+  }
+  else if (state.form.process === 'success') {
     submitButton.disabled = false;
+    urlInput.classList.remove('is-invalid');
     feedback.classList.add('text-success');
     feedback.textContent = i18n.t('form.feedback.success');
+    urlInput.value = '';
     
     setTimeout(() => {
+      if (state.form.process !== 'success') return;
       feedback.textContent = '';
       feedback.classList.remove('text-success');
     }, 3000);
-  } else if (state.form.process === 'filling') {
+  }
+  else if (state.form.process === 'filling') {
     submitButton.disabled = false;
+    urlInput.classList.remove('is-invalid');
   }
 
-  // Фиды
+  renderFeeds(state, feedsContainer, i18n);
+  renderPosts(state, postsContainer, i18n);
+};
+
+const renderFeeds = (state, container, i18n) => {
   const feedsHtml = `
     <div class="card mb-3">
       <div class="card-body">
@@ -39,7 +55,7 @@ const render = (state, elements, i18n) => {
         ${state.feeds.length === 0 
           ? `<p>${i18n.t('feeds.empty')}</p>`
           : state.feeds.map(feed => `
-            <div class="mb-3">
+            <div class="feed mb-3">
               <h3 class="h6 fw-bold">${feed.title}</h3>
               <p>${feed.description}</p>
             </div>
@@ -48,8 +64,13 @@ const render = (state, elements, i18n) => {
       </div>
     </div>
   `;
+  
+  if (container.innerHTML !== feedsHtml) {
+    container.innerHTML = feedsHtml;
+  }
+};
 
-  // Посты
+const renderPosts = (state, container, i18n) => {
   const postsHtml = `
     <div class="card">
       <div class="card-body">
@@ -58,12 +79,13 @@ const render = (state, elements, i18n) => {
           ? `<p>${i18n.t('posts.empty')}</p>`
           : `<ul class="list-unstyled">
               ${state.posts.map(post => `
-                <li class="mb-2 d-flex justify-content-between align-items-start">
+                <li class="post mb-2 d-flex justify-content-between align-items-start">
                   <a 
                     href="${post.link}" 
                     target="_blank" 
                     rel="noopener noreferrer" 
                     class="${state.ui.visitedPosts.has(post.id) ? 'fw-normal' : 'fw-bold'}"
+                    data-id="${post.id}"
                   >
                     ${post.title}
                   </a>
@@ -83,9 +105,10 @@ const render = (state, elements, i18n) => {
       </div>
     </div>
   `;
-
-  feedsContainer.innerHTML = feedsHtml;
-  postsContainer.innerHTML = postsHtml;
+  
+  if (container.innerHTML !== postsHtml) {
+    container.innerHTML = postsHtml;
+  }
 };
 
 export default (state, elements, i18n) => onChange(state, () => {
