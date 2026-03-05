@@ -5,7 +5,6 @@ import axios from 'axios';
 import _uniqueId from 'lodash/uniqueId.js';
 import { Modal } from 'bootstrap';
 import resources from './locales/index.js';
-import initView from './view.js';
 import parseRSS from './parser.js';
 
 class RssReader {
