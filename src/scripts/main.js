@@ -136,7 +136,8 @@ class RssReader {
       .then(data => {
         try {
           return parseRSS(data, feed.url);
-        } catch (error) {
+        }
+        catch (error) {
           throw new Error('parseError');
         }
       })
@@ -198,7 +199,8 @@ class RssReader {
         try {
           const parsed = parseRSS(data, url);
           return parsed;
-        } catch (error) {
+        }
+        catch (error) {
           throw new Error('parseError');
         }
       })
@@ -220,7 +222,8 @@ class RssReader {
         this.watchedState.form.process = 'error';
         if (error.message === 'parseError') {
           this.watchedState.form.error = 'form.feedback.parseError';
-        } else {
+        }
+        else {
           this.watchedState.form.error = 'form.feedback.error';
         }
         throw error;
@@ -232,13 +235,19 @@ class RssReader {
     this.watchedState.posts = [...this.watchedState.posts, ...posts];
     
     this.urlInput.value = '';
+    
     this.watchedState.form.process = 'success';
     this.watchedState.form.error = null;
+    
     this.urlInput.focus();
 
     if (!this.updateTimeout) {
       this.startUpdates();
     }
+
+    setTimeout(() => {
+      this.watchedState.form.process = 'filling';
+    }, 3000);
   }
 
   showModal(post) {
