@@ -1,13 +1,7 @@
 export default {
   ru: {
     translation: {
-      app: {
-        title: 'RSS агрегатор',
-        description: 'Начните читать RSS сегодня! Это легко, красиво и удобно.',
-      },
       form: {
-        label: 'Ссылка RSS',
-        button: 'Добавить',
         loading: 'Загрузка...',
         success: 'RSS успешно загружен',
       },
@@ -20,16 +14,10 @@ export default {
       },
       feeds: {
         title: 'Фиды',
-        empty: 'Фиды отсутствуют',
       },
       posts: {
         title: 'Посты',
-        empty: 'Посты отсутствуют',
         button: 'Просмотр',
-      },
-      modal: {
-        close: 'Закрыть',
-        readFull: 'Читать полностью',
       },
     },
   },
