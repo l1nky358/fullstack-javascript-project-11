@@ -194,13 +194,11 @@ class RssReader {
         throw new Error('network');
       })
       .then(data => {
-        console.log('Raw data from proxy:', data);
         try {
           const parsed = parseRSS(data, url);
           return parsed;
         }
         catch (error) {
-          console.log('Parse error:', error);
           throw new Error('parseError');
         }
       })
@@ -241,9 +239,6 @@ class RssReader {
     if (!this.updateTimeout) {
       this.startUpdates();
     }
-
-    this.watchedState.form.process = 'success';
-    this.watchedState.form.error = null;
 
     setTimeout(() => {
       this.watchedState.form.process = 'filling';
