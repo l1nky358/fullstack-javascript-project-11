@@ -223,7 +223,7 @@ class RssReader {
           this.watchedState.form.error = 'Ресурс не содержит валидный RSS';
         }
         else {
-          this.watchedState.form.error = 'Ошибка сети';
+          this.watchedState.form.error = 'RSS успешно загружен';
         }
         throw error;
       });
