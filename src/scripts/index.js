@@ -26,7 +26,6 @@ const app = async () => {
   const i18n = await initI18n();
 
   const elements = {
-    form: document.getElementById('rss-form'),
     input: document.getElementById('rss-url'),
     feedback: document.getElementById('feedback'),
     submitButton: document.getElementById('submit-button'),
@@ -54,7 +53,7 @@ const app = async () => {
 
   const watchedState = initView(state, elements, i18n);
 
-  elements.form.addEventListener('submit', (e) => {
+  document.getElementById('rss-form').addEventListener('submit', (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
     const url = formData.get('url');
@@ -104,13 +103,15 @@ const app = async () => {
     if (button) {
       const postId = button.dataset.id;
       const post = state.posts.find(p => p.id === postId);
-      if (post && !state.ui.visitedPosts.has(postId)) {
-        watchedState.ui.visitedPosts.add(postId);
+      if (post) {
+        if (!state.ui.visitedPosts.has(postId)) {
+          watchedState.ui.visitedPosts.add(postId);
+        }
+        elements.modalTitle.textContent = post.title;
+        elements.modalBody.textContent = post.description;
+        elements.modalLink.href = post.link;
+        modal.show();
       }
-      elements.modalTitle.textContent = post.title;
-      elements.modalBody.textContent = post.description;
-      elements.modalLink.href = post.link;
-      modal.show();
     }
   });
 
