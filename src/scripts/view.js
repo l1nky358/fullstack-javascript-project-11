@@ -18,11 +18,11 @@ const renderFeedback = (elements, i18n, error, process) => {
   switch(process) {
     case 'success':
       addStyle(feedback, 'text-success');
-      message = localize(i18n, 'form.feedback.success', 'RSS успешно загружен');
+      message = localize(i18n, 'RSS успешно загружен');
       break;
     case 'sending':
       addStyle(feedback, 'text-info');
-      message = localize(i18n, 'form.feedback.sending', 'RSS отправляется...');
+      message = localize(i18n, 'RSS отправляется...');
       break;
     default:
       if (error) {
