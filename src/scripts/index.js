@@ -229,21 +229,19 @@ class RssReader {
   }
 
   addFeed({ feed, posts }) {
-    this.watchedState.feeds = [...this.watchedState.feeds, feed];
-    this.watchedState.posts = [...this.watchedState.posts, ...posts];
-    
-    this.urlInput.value = '';
-    this.urlInput.focus();
+  this.watchedState.feeds = [...this.watchedState.feeds, feed];
+  this.watchedState.posts = [...this.watchedState.posts, ...posts];
+  
+  this.urlInput.value = '';
+  this.urlInput.focus();
 
-    if (!this.updateTimeout) {
-      this.startUpdates();
-    }
-
-    setTimeout(() => {
-      this.watchedState.form.process = 'filling';
-      this.watchedState.form.error = null;
-    }, 3000);
+  if (!this.updateTimeout) {
+    this.startUpdates();
   }
+
+  this.watchedState.form.process = 'filling';
+  this.watchedState.form.error = null;
+}
 
   showModal(post) {
     const modalTitle = this.modalElement.querySelector('.modal-title');
