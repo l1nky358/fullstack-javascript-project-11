@@ -1,92 +1,118 @@
 import onChange from 'on-change';
 
-const render = (state, elements, i18n) => {
-  const { feedback, urlInput, submitButton, feedsContainer, postsContainer } = elements;
-
-  urlInput.classList.remove('is-invalid');
-  feedback.className = 'feedback';
-  feedback.textContent = '';
-
-  if (state.form.error) {
-    urlInput.classList.add('is-invalid');
+const renderErrors = (elements, error) => {
+  const { feedback, input } = elements;
+  if (error) {
+    input.classList.add('is-invalid');
     feedback.classList.add('invalid-feedback');
-    feedback.textContent = state.form.error;
+    feedback.textContent = error;
+  } else {
+    input.classList.remove('is-invalid');
+    feedback.classList.remove('invalid-feedback');
+    feedback.textContent = '';
   }
-  else if (state.form.process === 'sending') {
-    submitButton.disabled = true;
-    feedback.classList.add('text-info');
-    feedback.textContent = 'Ресурс не содержит валидный RSS';
+};
+
+const renderProcess = (elements, process, i18n) => {
+  const { feedback, submitButton } = elements;
+  switch (process) {
+    case 'sending':
+      submitButton.disabled = true;
+      feedback.classList.add('text-info');
+      feedback.textContent = i18n.t('form.loading');
+      break;
+    case 'success':
+      submitButton.disabled = false;
+      feedback.classList.add('text-success');
+      feedback.textContent = i18n.t('form.success');
+      break;
+    case 'error':
+      submitButton.disabled = false;
+      break;
+    default:
+      submitButton.disabled = false;
+      feedback.textContent = '';
+      break;
   }
-  else if (state.form.process === 'success') {
-    submitButton.disabled = false;
-    feedback.classList.add('text-success');
-    feedback.textContent = 'RSS успешно загружен';
-  }
-  else if (state.form.process === 'error') {
-    submitButton.disabled = false;
-  }
-  else {
-    submitButton.disabled = false;
+};
+
+const renderFeeds = (elements, feeds, i18n) => {
+  const { feedsContainer } = elements;
+  if (feeds.length === 0) {
+    feedsContainer.innerHTML = '';
+    return;
   }
 
   const feedsHtml = `
     <div class="card mb-3">
       <div class="card-body">
         <h2 class="card-title h5">${i18n.t('feeds.title')}</h2>
-        ${state.feeds.length === 0 
-          ? `<p>${i18n.t('feeds.empty')}</p>`
-          : state.feeds.map(feed => `
-            <div class="mb-3">
-              <h3 class="h6 fw-bold">${feed.title}</h3>
-              <p>${feed.description}</p>
-            </div>
-          `).join('')
-        }
+        ${feeds.map(feed => `
+          <div class="mb-3">
+            <h3 class="h6 fw-bold">${feed.title}</h3>
+            <p>${feed.description}</p>
+          </div>
+        `).join('')}
       </div>
     </div>
   `;
+  feedsContainer.innerHTML = feedsHtml;
+};
+
+const renderPosts = (elements, posts, uiState, i18n) => {
+  const { postsContainer } = elements;
+  if (posts.length === 0) {
+    postsContainer.innerHTML = '';
+    return;
+  }
 
   const postsHtml = `
     <div class="card">
       <div class="card-body">
         <h2 class="card-title h5">${i18n.t('posts.title')}</h2>
-        ${state.posts.length === 0
-          ? `<p>${i18n.t('posts.empty')}</p>`
-          : `<ul class="list-unstyled">
-              ${state.posts.map(post => {
-                const isVisited = state.ui.visitedPosts.has(post.id);
-                return `
-                  <li class="mb-2 d-flex justify-content-between align-items-start">
-                    <a 
-                      href="${post.link}" 
-                      target="_blank" 
-                      rel="noopener noreferrer" 
-                      class="${isVisited ? 'fw-normal' : 'fw-bold'}"
-                    >
-                      ${post.title}
-                    </a>
-                    <button 
-                      type="button" 
-                      class="btn btn-outline-primary btn-sm" 
-                      data-id="${post.id}"
-                      data-bs-toggle="modal"
-                      data-bs-target="#modal"
-                    >
-                      ${i18n.t('posts.button')}
-                    </button>
-                  </li>
-                `;
-              }).join('')}
-            </ul>`
-        }
+        <ul class="list-unstyled">
+          ${posts.map(post => `
+            <li class="mb-2 d-flex justify-content-between align-items-start">
+              <a 
+                href="${post.link}" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                class="${uiState.visitedPosts.has(post.id) ? '' : 'fw-bold'}"
+              >
+                ${post.title}
+              </a>
+              <button 
+                type="button" 
+                class="btn btn-outline-primary btn-sm" 
+                data-id="${post.id}"
+                data-bs-toggle="modal"
+                data-bs-target="#modal"
+              >
+                ${i18n.t('posts.button')}
+              </button>
+            </li>
+          `).join('')}
+        </ul>
       </div>
     </div>
   `;
-
-  feedsContainer.innerHTML = feedsHtml;
   postsContainer.innerHTML = postsHtml;
 };
 
-export default (state, elements, i18n) => onChange(state, () => {
+const renderModal = (elements, post) => {
+  const { modalTitle, modalBody, modalLink } = elements;
+  modalTitle.textContent = post.title;
+  modalBody.textContent = post.description;
+  modalLink.href = post.link;
+};
+
+const render = (state, elements, i18n) => {
+  renderErrors(elements, state.form.error);
+  renderProcess(elements, state.form.process, i18n);
+  renderFeeds(elements, state.feeds, i18n);
+  renderPosts(elements, state.posts, state.ui, i18n);
+};
+
+export default (state, elements, i18n) => onChange(state, (path, value) => {
   render(state, elements, i18n);
 });
