@@ -238,6 +238,11 @@ class RssReader {
     if (!this.updateTimeout) {
       this.startUpdates();
     }
+
+    setTimeout(() => {
+      this.watchedState.form.process = 'filling';
+      this.watchedState.form.error = null;
+    }, 3000);
   }
 
   showModal(post) {
