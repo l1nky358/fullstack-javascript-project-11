@@ -194,11 +194,13 @@ class RssReader {
         throw new Error('network');
       })
       .then(data => {
+        console.log('Raw data from proxy:', data);
         try {
           const parsed = parseRSS(data, url);
           return parsed;
         }
         catch (error) {
+          console.log('Parse error:', error);
           throw new Error('parseError');
         }
       })
@@ -223,7 +225,7 @@ class RssReader {
           this.watchedState.form.error = 'Ресурс не содержит валидный RSS';
         }
         else {
-          this.watchedState.form.error = 'RSS успешно загружен';
+          this.watchedState.form.error = 'Ошибка сети';
         }
         throw error;
       });
