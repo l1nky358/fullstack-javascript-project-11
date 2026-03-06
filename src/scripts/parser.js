@@ -1,30 +1,31 @@
-const parseRSS = (data, url) => {
+const parseRss = (data) => {
   const parser = new DOMParser();
-  const xml = parser.parseFromString(data, 'text/xml');
-  
-  const parseError = xml.querySelector('parsererror');
+  const doc = parser.parseFromString(data, 'application/xml');
+
+  const parseError = doc.querySelector('parsererror');
   if (parseError) {
-    throw new Error('parseError');
+    const error = new Error('noRss');
+    error.isParseError = true;
+    throw error;
   }
 
-  const feedTitle = xml.querySelector('channel > title')?.textContent?.trim();
-  const feedDescription = xml.querySelector('channel > description')?.textContent?.trim();
+  const feedTitle = doc.querySelector('channel > title')?.textContent.trim() || '';
+  const feedDescription = doc.querySelector('channel > description')?.textContent.trim() || '';
 
-  const items = xml.querySelectorAll('item');
+  const items = doc.querySelectorAll('item');
   const posts = Array.from(items).map((item) => ({
-    title: item.querySelector('title')?.textContent?.trim() || 'Без названия',
-    link: item.querySelector('link')?.textContent?.trim() || '#',
-    description: item.querySelector('description')?.textContent?.trim() || '',
+    title: item.querySelector('title')?.textContent.trim() || '',
+    link: item.querySelector('link')?.textContent.trim() || '',
+    description: item.querySelector('description')?.textContent.trim() || '',
   }));
 
   return {
     feed: {
-      url,
-      title: feedTitle || 'Без названия',
-      description: feedDescription || '',
+      title: feedTitle,
+      description: feedDescription,
     },
     posts,
   };
 };
 
-export default parseRSS;
+export default parseRss;
