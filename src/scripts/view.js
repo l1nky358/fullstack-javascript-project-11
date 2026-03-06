@@ -15,7 +15,7 @@ const render = (state, elements, i18n) => {
   else if (state.form.process === 'sending') {
     submitButton.disabled = true;
     feedback.classList.add('text-info');
-    feedback.textContent = 'Загрузка...';
+    feedback.textContent = 'Ошибка сети';
   }
   else if (state.form.process === 'success') {
     submitButton.disabled = false;
