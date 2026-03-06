@@ -239,6 +239,13 @@ class RssReader {
     if (!this.updateTimeout) {
       this.startUpdates();
     }
+
+    this.watchedState.form.process = 'success';
+    this.watchedState.form.error = null;
+
+    setTimeout(() => {
+      this.watchedState.form.process = 'filling';
+    }, 100);
   }
 
   showModal(post) {
