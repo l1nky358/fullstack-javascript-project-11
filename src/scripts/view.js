@@ -1,165 +1,99 @@
 import onChange from 'on-change';
 
-const addStyle = (element, style) =>
-  element.classList.add(style);
+const render = (state, elements, i18n) => {
+  const { feedback, urlInput, submitButton, feedsContainer, postsContainer } = elements;
 
-const replaceContent = (container, newContent) =>
-  container.replaceChildren(newContent);
+  urlInput.classList.remove('is-invalid');
+  feedback.className = 'feedback';
+  feedback.textContent = '';
 
-const localize = (i18n, key, fallback) => i18n(key) ?? fallback;
-
-const renderFeedback = (elements, i18n, error, process) => {
-  const { feedback, urlInput } = elements;
-
-  feedback.classList.remove('text-success', 'text-danger', 'text-info');
-
-  let message = "";
-
-  switch(process) {
-    case 'success':
-      addStyle(feedback, 'text-success');
-      message = localize(i18n, 'RSS успешно загружен');
-      break;
-    case 'sending':
-      addStyle(feedback, 'text-info');
-      message = localize(i18n, 'RSS отправляется...');
-      break;
-    default:
-      if (error) {
-        addStyle(feedback, 'text-danger');
-        message = localize(i18n, error, 'Ошибка');
+  if (state.form.error) {
+    urlInput.classList.add('is-invalid');
+    feedback.classList.add('invalid-feedback');
+    feedback.textContent = state.form.error;
+  }
+  else if (state.form.process === 'sending') {
+    submitButton.disabled = true;
+    feedback.classList.add('text-info');
+    feedback.textContent = 'Загрузка...';
+  }
+  else if (state.form.process === 'success') {
+    submitButton.disabled = false;
+    feedback.classList.add('text-success');
+    feedback.textContent = 'RSS успешно загружен';
+    
+    setTimeout(() => {
+      if (state.form.process === 'success') {
+        feedback.textContent = '';
+        feedback.classList.remove('text-success');
       }
+    }, 3000);
+  }
+  else if (state.form.process === 'error') {
+    submitButton.disabled = false;
+  }
+  else {
+    submitButton.disabled = false;
   }
 
-  feedback.textContent = message;
-  urlInput.classList.toggle('is-invalid', !!error);
+  const feedsHtml = `
+    <div class="card mb-3">
+      <div class="card-body">
+        <h2 class="card-title h5">${i18n.t('feeds.title')}</h2>
+        ${state.feeds.length === 0 
+          ? `<p>${i18n.t('feeds.empty')}</p>`
+          : state.feeds.map(feed => `
+            <div class="mb-3">
+              <h3 class="h6 fw-bold">${feed.title}</h3>
+              <p>${feed.description}</p>
+            </div>
+          `).join('')
+        }
+      </div>
+    </div>
+  `;
+
+  const postsHtml = `
+    <div class="card">
+      <div class="card-body">
+        <h2 class="card-title h5">${i18n.t('posts.title')}</h2>
+        ${state.posts.length === 0
+          ? `<p>${i18n.t('posts.empty')}</p>`
+          : `<ul class="list-unstyled">
+              ${state.posts.map(post => {
+                const isVisited = state.ui.visitedPosts.has(post.id);
+                return `
+                  <li class="mb-2 d-flex justify-content-between align-items-start">
+                    <a 
+                      href="${post.link}" 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      class="${isVisited ? 'fw-normal' : 'fw-bold'}"
+                    >
+                      ${post.title}
+                    </a>
+                    <button 
+                      type="button" 
+                      class="btn btn-outline-primary btn-sm" 
+                      data-id="${post.id}"
+                      data-bs-toggle="modal"
+                      data-bs-target="#modal"
+                    >
+                      ${i18n.t('posts.button')}
+                    </button>
+                  </li>
+                `;
+              }).join('')}
+            </ul>`
+        }
+      </div>
+    </div>
+  `;
+
+  feedsContainer.innerHTML = feedsHtml;
+  postsContainer.innerHTML = postsHtml;
 };
 
-const renderFeeds = (elements, i18n, feeds) => {
-  const { feedsContainer } = elements;
-
-  if (!feeds.length) {
-    replaceContent(feedsContainer, '');
-    return;
-  }
-
-  const card = createCard(localize(i18n, 'feeds'), feeds.map(({ title, description }) => ({
-    title,
-    description
-  })));
-
-  replaceContent(feedsContainer, card);
-};
-
-const createCard = (title, items) => {
-  const card = document.createElement('div');
-  addStyle(card, 'card border-0');
-
-  const body = document.createElement('div');
-  addStyle(body, 'card-body');
-
-  const header = document.createElement('h2');
-  addStyle(header, 'card-title h4');
-  header.textContent = title;
-
-  body.appendChild(header);
-
-  const listGroup = document.createElement('ul');
-  addStyle(listGroup, 'list-group border-0 rounded-0');
-
-  items.forEach(item => {
-    const itemEl = document.createElement('li');
-    addStyle(itemEl, 'list-group-item border-0 border-end-0');
-
-    const heading = document.createElement('h3');
-    addStyle(heading, 'h6 m-0');
-    heading.textContent = item.title;
-
-    const desc = document.createElement('p');
-    addStyle(desc, 'm-0 small text-black-50');
-    desc.textContent = item.description;
-
-    itemEl.append(heading, desc);
-    listGroup.appendChild(itemEl);
-  });
-
-  card.append(body, listGroup);
-  return card;
-};
-
-const renderPosts = (elements, i18n, posts, visitedPosts) => {
-  const { postsContainer } = elements;
-
-  if (!posts.length) {
-    replaceContent(postsContainer, '');
-    return;
-  }
-
-  const card = createPostCard(localize(i18n, 'posts'), posts, visitedPosts);
-
-  replaceContent(postsContainer, card);
-};
-
-const createPostCard = (title, posts, visitedPosts) => {
-  const card = document.createElement('div');
-  addStyle(card, 'card border-0');
-
-  const body = document.createElement('div');
-  addStyle(body, 'card-body');
-
-  const header = document.createElement('h2');
-  addStyle(header, 'card-title h4');
-  header.textContent = title;
-
-  body.appendChild(header);
-
-  const listGroup = document.createElement('ul');
-  addStyle(listGroup, 'list-group border-0 rounded-0');
-
-  posts.forEach(post => {
-    const itemEl = document.createElement('li');
-    addStyle(itemEl, 'list-group-item d-flex justify-content-between align-items-start border-0 border-end-0');
-
-    const link = document.createElement('a');
-    link.href = post.link;
-    link.target = "_blank";
-    link.rel = "noopener noreferrer";
-    link.textContent = post.title;
-    link.dataset.id = post.id;
-    addStyle(link, visitedPosts.has(post.id) ? 'fw-normal' : 'fw-bold');
-
-    const button = document.createElement('button');
-    addStyle(button, 'btn btn-outline-primary btn-sm');
-    button.type = 'button';
-    button.dataset.id = post.id;
-    button.dataset.bsToggle = 'modal';
-    button.dataset.bsTarget = '#modal';
-    button.textContent = localize(i18n, 'preview', 'Просмотреть');
-
-    itemEl.append(link, button);
-    listGroup.appendChild(itemEl);
-  });
-
-  card.append(body, listGroup);
-  return card;
-};
-
-const initView = (state, elements, i18n) => {
-  const watchedState = onChange(state, (path, value) => {
-    if (['form.error', 'form.process'].includes(path)) {
-      renderFeedback(elements, i18n, state.form.error, state.form.process);
-    }
-
-    if (path === 'feeds') {
-      renderFeeds(elements, i18n, state.feeds);
-    }
-
-    if (['posts', 'ui.visitedPosts'].includes(path)) {
-      renderPosts(elements, i18n, state.posts, state.ui.visitedPosts);
-    }
-  });
-
-  return watchedState;
-};
-
-export default initView;
+export default (state, elements, i18n) => onChange(state, () => {
+  render(state, elements, i18n);
+});
