@@ -4,15 +4,14 @@ import * as yup from 'yup';
 import axios from 'axios';
 import _uniqueId from 'lodash/uniqueId.js';
 import { Modal } from 'bootstrap';
-import initI18n from './init.js';
 import initView from './view.js';
 import parseRss from './parser.js';
 
 const validateUrl = (url, feeds) => {
   const schema = yup.string()
-    .url('errors.invalidUrl')
-    .required('errors.required')
-    .test('unique', 'errors.duplicate', (value) => !feeds.some(feed => feed.url === value));
+    .url('Ссылка должна быть валидным URL')
+    .required('Не должно быть пустым')
+    .test('unique', 'RSS уже существует', (value) => !feeds.some(feed => feed.url === value));
 
   return schema.validate(url);
 };
@@ -23,9 +22,7 @@ const fetchRss = (url) => {
     .then(response => response.data.contents);
 };
 
-const app = async () => {
-  const i18n = await initI18n();
-
+const app = () => {
   const elements = {
     input: document.getElementById('rss-url'),
     feedback: document.getElementById('feedback'),
@@ -52,7 +49,7 @@ const app = async () => {
     },
   };
 
-  const watchedState = initView(state, elements, i18n);
+  const watchedState = initView(state, elements);
 
   document.getElementById('rss-form').addEventListener('submit', (e) => {
     e.preventDefault();
@@ -84,17 +81,17 @@ const app = async () => {
           elements.input.focus();
         } catch (parseError) {
           watchedState.form.process = 'error';
-          watchedState.form.error = i18n.t('errors.noRss');
+          watchedState.form.error = 'Ресурс не содержит валидный RSS';
         }
       })
       .catch((error) => {
         watchedState.form.process = 'error';
-        if (error.message === 'network') {
-          watchedState.form.error = i18n.t('errors.network');
+        if (error.message === 'Network Error') {
+          watchedState.form.error = 'Ошибка сети';
         } else if (error.message) {
-          watchedState.form.error = i18n.t(error.message);
+          watchedState.form.error = error.message;
         } else {
-          watchedState.form.error = i18n.t('errors.network');
+          watchedState.form.error = 'Ошибка сети';
         }
       });
   });
