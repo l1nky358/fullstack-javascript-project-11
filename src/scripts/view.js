@@ -1,6 +1,6 @@
 import onChange from 'on-change';
 
-const render = (state, elements, i18n) => {
+const render = (state, elements) => {
   const { feedback, input, submitButton, feedsContainer, postsContainer } = elements;
 
   input.classList.remove('is-invalid');
@@ -15,12 +15,12 @@ const render = (state, elements, i18n) => {
   else if (state.form.process === 'sending') {
     submitButton.disabled = true;
     feedback.classList.add('text-info');
-    feedback.textContent = i18n.t('form.loading');
+    feedback.textContent = 'Загрузка...';
   }
   else if (state.form.process === 'success') {
     submitButton.disabled = false;
     feedback.classList.add('text-success');
-    feedback.textContent = i18n.t('form.success');
+    feedback.textContent = 'RSS успешно загружен';
   }
   else if (state.form.process === 'error') {
     submitButton.disabled = false;
@@ -36,7 +36,7 @@ const render = (state, elements, i18n) => {
       const feedsHtml = `
         <div class="card mb-3">
           <div class="card-body">
-            <h2 class="card-title h5">${i18n.t('feeds.title')}</h2>
+            <h2 class="card-title h5">Фиды</h2>
             ${state.feeds.map(feed => `
               <div class="mb-3">
                 <h3 class="h6 fw-bold">${feed.title}</h3>
@@ -57,7 +57,7 @@ const render = (state, elements, i18n) => {
       const postsHtml = `
         <div class="card">
           <div class="card-body">
-            <h2 class="card-title h5">${i18n.t('posts.title')}</h2>
+            <h2 class="card-title h5">Посты</h2>
             <ul class="list-unstyled">
               ${state.posts.map(post => `
                 <li class="mb-2 d-flex justify-content-between align-items-start">
@@ -76,7 +76,7 @@ const render = (state, elements, i18n) => {
                     data-bs-toggle="modal"
                     data-bs-target="#modal"
                   >
-                    ${i18n.t('posts.button')}
+                    Просмотр
                   </button>
                 </li>
               `).join('')}
@@ -89,6 +89,6 @@ const render = (state, elements, i18n) => {
   }
 };
 
-export default (state, elements, i18n) => onChange(state, () => {
-  render(state, elements, i18n);
+export default (state, elements) => onChange(state, () => {
+  render(state, elements);
 });
