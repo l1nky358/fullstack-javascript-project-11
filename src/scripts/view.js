@@ -21,13 +21,6 @@ const render = (state, elements, i18n) => {
     submitButton.disabled = false;
     feedback.classList.add('text-success');
     feedback.textContent = 'RSS успешно загружен';
-    
-    setTimeout(() => {
-      if (state.form.process === 'success') {
-        feedback.textContent = '';
-        feedback.classList.remove('text-success');
-      }
-    }, 3000);
   }
   else if (state.form.process === 'error') {
     submitButton.disabled = false;
