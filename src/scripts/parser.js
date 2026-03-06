@@ -4,12 +4,11 @@ const parseRSS = (data, url) => {
   
   const parseError = xml.querySelector('parsererror');
   if (parseError) {
-    console.error('Parse error:', parseError.textContent);
-    throw new Error('noRss');
+    throw new Error('parseError');
   }
 
-  const feedTitle = xml.querySelector('channel > title')?.textContent?.trim() || 'Без названия';
-  const feedDescription = xml.querySelector('channel > description')?.textContent?.trim() || '';
+  const feedTitle = xml.querySelector('channel > title')?.textContent?.trim();
+  const feedDescription = xml.querySelector('channel > description')?.textContent?.trim();
 
   const items = xml.querySelectorAll('item');
   const posts = Array.from(items).map((item) => ({
@@ -18,13 +17,11 @@ const parseRSS = (data, url) => {
     description: item.querySelector('description')?.textContent?.trim() || '',
   }));
 
-  console.log('Parsed feed:', { feedTitle, feedDescription, postsCount: posts.length });
-
   return {
     feed: {
       url,
-      title: feedTitle,
-      description: feedDescription,
+      title: feedTitle || 'Без названия',
+      description: feedDescription || '',
     },
     posts,
   };
