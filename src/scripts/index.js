@@ -59,10 +59,10 @@ class RssReader {
   initYupLocale() {
     yup.setLocale({
       mixed: {
-        required: 'errors.required',
+        required: 'Не должно быть пустым',
       },
       string: {
-        url: 'errors.invalidUrl',
+        url: 'Ссылка должна быть валидным URL',
       },
     });
   }
@@ -165,7 +165,7 @@ class RssReader {
       url: yup.string()
         .url()
         .required()
-        .test('unique', 'errors.duplicate', (value) => {
+        .test('unique', 'RSS уже существует', (value) => {
           return !this.state.feeds.some(feed => feed.url === value);
         })
     });
@@ -219,10 +219,10 @@ class RssReader {
       .catch((error) => {
         this.watchedState.form.process = 'error';
         if (error.message === 'parseError') {
-          this.watchedState.form.error = 'form.feedback.parseError';
+          this.watchedState.form.error = 'Ресурс не содержит валидный RSS';
         }
         else {
-          this.watchedState.form.error = 'form.feedback.error';
+          this.watchedState.form.error = 'Ошибка сети';
         }
         throw error;
       });
@@ -233,8 +233,6 @@ class RssReader {
     this.watchedState.posts = [...this.watchedState.posts, ...posts];
     
     this.urlInput.value = '';
-    this.watchedState.form.process = 'success';
-    this.watchedState.form.error = null;
     this.urlInput.focus();
 
     if (!this.updateTimeout) {
