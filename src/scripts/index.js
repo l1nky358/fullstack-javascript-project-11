@@ -1,3 +1,4 @@
+import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap';
 import * as yup from 'yup';
 import axios from 'axios';
