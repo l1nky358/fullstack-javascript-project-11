@@ -1,147 +1,160 @@
 import onChange from 'on-change';
 
+const addStyle = (element, style) =>
+  element.classList.add(style);
+
+const replaceContent = (container, newContent) =>
+  container.replaceChildren(newContent);
+
+const localize = (i18n, key, fallback) => i18n(key) ?? fallback;
+
 const renderFeedback = (elements, i18n, error, process) => {
   const { feedback, urlInput } = elements;
-  
-  feedback.classList.remove('text-success', 'text-danger', 'text-info');
-  
-  const t = (key, fallback) => {
-    try {
-      const v = i18n(key);
-      return v && v !== key ? v : fallback;
-    } catch {
-      return fallback;
-    }
-  };
 
-  if (process === 'success') {
-    feedback.classList.add('text-success');
-    feedback.textContent = t('form.feedback.success', 'RSS успешно загружен');
-    urlInput.classList.remove('is-invalid');
-  } 
-  else if (error) {
-    feedback.classList.add('text-danger');
-    feedback.textContent = t(error, 'Ошибка');
-    urlInput.classList.add('is-invalid');
-  } 
-  else if (process === 'sending') {
-    feedback.classList.add('text-info');
-    feedback.textContent = t('form.feedback.sending', 'RSS отправляется…');
-  } 
-  else {
-    feedback.textContent = '';
+  feedback.classList.remove('text-success', 'text-danger', 'text-info');
+
+  let message = "";
+
+  switch(process) {
+    case 'success':
+      addStyle(feedback, 'text-success');
+      message = localize(i18n, 'form.feedback.success', 'RSS успешно загружен');
+      break;
+    case 'sending':
+      addStyle(feedback, 'text-info');
+      message = localize(i18n, 'form.feedback.sending', 'RSS отправляется...');
+      break;
+    default:
+      if (error) {
+        addStyle(feedback, 'text-danger');
+        message = localize(i18n, error, 'Ошибка');
+      }
   }
+
+  feedback.textContent = message;
+  urlInput.classList.toggle('is-invalid', !!error);
 };
 
 const renderFeeds = (elements, i18n, feeds) => {
   const { feedsContainer } = elements;
-  
-  if (feeds.length === 0) {
-    feedsContainer.innerHTML = '';
+
+  if (!feeds.length) {
+    replaceContent(feedsContainer, '');
     return;
   }
 
-  const feedsDiv = document.createElement('div');
-  feedsDiv.classList.add('card', 'border-0');
-  
-  const feedsBody = document.createElement('div');
-  feedsBody.classList.add('card-body');
-  
-  const feedsTitle = document.createElement('h2');
-  feedsTitle.classList.add('card-title', 'h4');
-  feedsTitle.textContent = i18n('feeds');
-  
-  feedsBody.append(feedsTitle);
-  feedsDiv.append(feedsBody);
-  
-  const feedsList = document.createElement('ul');
-  feedsList.classList.add('list-group', 'border-0', 'rounded-0');
-  
-  feeds.forEach((feed) => {
-    const li = document.createElement('li');
-    li.classList.add('list-group-item', 'border-0', 'border-end-0');
-    
-    const h3 = document.createElement('h3');
-    h3.classList.add('h6', 'm-0');
-    h3.textContent = feed.title;
-    
-    const p = document.createElement('p');
-    p.classList.add('m-0', 'small', 'text-black-50');
-    p.textContent = feed.description;
-    
-    li.append(h3, p);
-    feedsList.append(li);
+  const card = createCard(localize(i18n, 'feeds'), feeds.map(({ title, description }) => ({
+    title,
+    description
+  })));
+
+  replaceContent(feedsContainer, card);
+};
+
+const createCard = (title, items) => {
+  const card = document.createElement('div');
+  addStyle(card, 'card border-0');
+
+  const body = document.createElement('div');
+  addStyle(body, 'card-body');
+
+  const header = document.createElement('h2');
+  addStyle(header, 'card-title h4');
+  header.textContent = title;
+
+  body.appendChild(header);
+
+  const listGroup = document.createElement('ul');
+  addStyle(listGroup, 'list-group border-0 rounded-0');
+
+  items.forEach(item => {
+    const itemEl = document.createElement('li');
+    addStyle(itemEl, 'list-group-item border-0 border-end-0');
+
+    const heading = document.createElement('h3');
+    addStyle(heading, 'h6 m-0');
+    heading.textContent = item.title;
+
+    const desc = document.createElement('p');
+    addStyle(desc, 'm-0 small text-black-50');
+    desc.textContent = item.description;
+
+    itemEl.append(heading, desc);
+    listGroup.appendChild(itemEl);
   });
-  
-  feedsDiv.append(feedsList);
-  feedsContainer.innerHTML = '';
-  feedsContainer.append(feedsDiv);
+
+  card.append(body, listGroup);
+  return card;
 };
 
 const renderPosts = (elements, i18n, posts, visitedPosts) => {
   const { postsContainer } = elements;
-  
-  if (posts.length === 0) {
-    postsContainer.innerHTML = '';
+
+  if (!posts.length) {
+    replaceContent(postsContainer, '');
     return;
   }
 
-  const postsDiv = document.createElement('div');
-  postsDiv.classList.add('card', 'border-0');
-  
-  const postsBody = document.createElement('div');
-  postsBody.classList.add('card-body');
-  
-  const postsTitle = document.createElement('h2');
-  postsTitle.classList.add('card-title', 'h4');
-  postsTitle.textContent = i18n('posts');
-  
-  postsBody.append(postsTitle);
-  postsDiv.append(postsBody);
-  
-  const postsList = document.createElement('ul');
-  postsList.classList.add('list-group', 'border-0', 'rounded-0');
-  
-  posts.forEach((post) => {
-    const li = document.createElement('li');
-    li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-start', 'border-0', 'border-end-0');
-    
+  const card = createPostCard(localize(i18n, 'posts'), posts, visitedPosts);
+
+  replaceContent(postsContainer, card);
+};
+
+const createPostCard = (title, posts, visitedPosts) => {
+  const card = document.createElement('div');
+  addStyle(card, 'card border-0');
+
+  const body = document.createElement('div');
+  addStyle(body, 'card-body');
+
+  const header = document.createElement('h2');
+  addStyle(header, 'card-title h4');
+  header.textContent = title;
+
+  body.appendChild(header);
+
+  const listGroup = document.createElement('ul');
+  addStyle(listGroup, 'list-group border-0 rounded-0');
+
+  posts.forEach(post => {
+    const itemEl = document.createElement('li');
+    addStyle(itemEl, 'list-group-item d-flex justify-content-between align-items-start border-0 border-end-0');
+
     const link = document.createElement('a');
     link.href = post.link;
-    link.classList.add(visitedPosts.has(post.id) ? 'fw-normal' : 'fw-bold');
-    link.setAttribute('data-id', post.id);
-    link.setAttribute('target', '_blank');
-    link.setAttribute('rel', 'noopener noreferrer');
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
     link.textContent = post.title;
-    
+    link.dataset.id = post.id;
+    addStyle(link, visitedPosts.has(post.id) ? 'fw-normal' : 'fw-bold');
+
     const button = document.createElement('button');
+    addStyle(button, 'btn btn-outline-primary btn-sm');
     button.type = 'button';
-    button.classList.add('btn', 'btn-outline-primary', 'btn-sm');
-    button.setAttribute('data-id', post.id);
-    button.setAttribute('data-bs-toggle', 'modal');
-    button.setAttribute('data-bs-target', '#modal');
-    button.textContent = i18n('preview');
-    
-    li.append(link, button);
-    postsList.append(li);
+    button.dataset.id = post.id;
+    button.dataset.bsToggle = 'modal';
+    button.dataset.bsTarget = '#modal';
+    button.textContent = localize(i18n, 'preview', 'Просмотреть');
+
+    itemEl.append(link, button);
+    listGroup.appendChild(itemEl);
   });
-  
-  postsDiv.append(postsList);
-  postsContainer.innerHTML = '';
-  postsContainer.append(postsDiv);
+
+  card.append(body, listGroup);
+  return card;
 };
 
 const initView = (state, elements, i18n) => {
   const watchedState = onChange(state, (path, value) => {
-    if (path === 'form.error' || path === 'form.process') {
+    if (['form.error', 'form.process'].includes(path)) {
       renderFeedback(elements, i18n, state.form.error, state.form.process);
     }
-    
+
     if (path === 'feeds') {
       renderFeeds(elements, i18n, state.feeds);
     }
-    
-    if (path === 'posts' || path === 'ui.visitedPosts') {
+
+    if (['posts', 'ui.visitedPosts'].includes(path)) {
       renderPosts(elements, i18n, state.posts, state.ui.visitedPosts);
     }
   });
