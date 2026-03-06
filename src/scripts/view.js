@@ -5,19 +5,28 @@ const renderFeedback = (elements, i18n, error, process) => {
   
   feedback.classList.remove('text-success', 'text-danger', 'text-info');
   
+  const t = (key, fallback) => {
+    try {
+      const v = i18n(key);
+      return v && v !== key ? v : fallback;
+    } catch {
+      return fallback;
+    }
+  };
+
   if (process === 'success') {
     feedback.classList.add('text-success');
-    feedback.textContent = i18n('form.feedback.success');
+    feedback.textContent = t('form.feedback.success', 'RSS успешно загружен');
     urlInput.classList.remove('is-invalid');
   } 
   else if (error) {
     feedback.classList.add('text-danger');
-    feedback.textContent = i18n(error);
+    feedback.textContent = t(error, 'Ошибка');
     urlInput.classList.add('is-invalid');
   } 
   else if (process === 'sending') {
     feedback.classList.add('text-info');
-    feedback.textContent = i18n('form.feedback.sending');
+    feedback.textContent = t('form.feedback.sending', 'RSS отправляется…');
   } 
   else {
     feedback.textContent = '';
