@@ -26,9 +26,7 @@ const generateId = () => {
 }
 
 const addFeed = (url, watchedState) => fetchRss(url)
-  .then((xmlString) => {
-    parseRss(xmlString, url))
-  }
+  .then((xmlString) => parseRss(xmlString, url))
   .then((data) => {
     const feedId = generateId()
     const newFeed = { ...data.feed, id: feedId, url }
