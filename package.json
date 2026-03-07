@@ -1,39 +1,44 @@
 {
   "name": "@hexlet/code",
   "version": "1.0.0",
-  "description": "[![Actions Status](https://github.com/l1nky358/fullstack-javascript-project-11/actions/workflows/hexlet-check.yml/badge.svg)](https://github.com/l1nky358/fullstack-javascript-project-11/actions)",
-  "main": "index.js",
+  "description": "RSS агрегатор - учебный проект на промисах",
+  "main": "src/js/app.js",
+  "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "lint": "eslint . --ext js",
-    "lint:fix": "eslint . --ext js --fix",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/l1nky358/fullstack-javascript-project-11.git"
-  },
-  "keywords": [],
+  "keywords": [
+    "rss",
+    "aggregator",
+    "javascript",
+    "promises",
+    "vite"
+  ],
   "author": "",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/l1nky358/fullstack-javascript-project-11/issues"
-  },
-  "homepage": "https://github.com/l1nky358/fullstack-javascript-project-11#readme",
-  "devDependencies": {
-    "eslint": "^8.56.0",
-    "eslint-config-airbnb-base": "^15.0.0",
-    "eslint-plugin-import": "^2.29.1",
-    "vite": "^5.0.12"
-  },
   "dependencies": {
-    "axios": "^1.6.5",
+    "@popperjs/core": "^2.11.8",
+    "axios": "^1.6.2",
     "bootstrap": "^5.3.2",
-    "i18next": "^23.7.16",
-    "lodash": "^4.17.21",
+    "i18next": "^23.7.11",
+    "i18next-browser-languagedetector": "^7.2.0",
     "on-change": "^5.0.1",
+    "valtio": "^1.13.0",
     "yup": "^1.3.3"
+  },
+  "devDependencies": {
+    "eslint": "^8.55.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.29.0",
+    "prettier": "^3.1.0",
+    "sass": "^1.69.5",
+    "vite": "^5.0.5"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

@@ -1,76 +1,64 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <title>RSS-aggregator</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-  </head>
-  <body>
-    <div id="modal" class="modal fade" tabindex="-1">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title"></h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RSS агрегатор</title>
+  <link rel="stylesheet" href="./styles/main.scss">
+</head>
+<body>
+  <div class="container mt-5">
+    <div class="row">
+      <div class="col-md-8 offset-md-2">
+        <h1 class="display-4 text-center mb-4">RSS агрегатор</h1>
+        
+        <form class="rss-form">
+          <div class="mb-3">
+            <label for="url-input" class="form-label">Ссылка RSS</label>
+            <div class="d-flex">
+              <input 
+                type="text" 
+                name="url"
+                id="url-input" 
+                class="form-control" 
+                placeholder="https://example.com/rss"
+                aria-label="url"
+              >
+              <button type="submit" class="btn btn-primary ms-2">Добавить</button>
+            </div>
+            <div class="feedback text-danger small mt-1"></div>
           </div>
-          <div class="modal-body">
-            <p></p>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
-            <a role="button" target="_blank" class="btn btn-primary full-article">Читать полностью</a>
-          </div>
+        </form>
+
+        <div class="feeds-section mt-4">
+          <h2>Фиды</h2>
+          <ul class="list-group feeds"></ul>
+        </div>
+
+        <div class="posts-section mt-4">
+          <h2>Посты</h2>
+          <ul class="list-group posts"></ul>
         </div>
       </div>
     </div>
+  </div>
 
-    <section class="container-fluid bg-dark p-5">
-      <div class="row">
-        <div class="fixed-top d-flex justify-content-end mt-2">
-          <div class="updating-error-alert alert alert-danger d-none" role="alert">Не удалось обновить посты</div>
+  <div class="modal fade" id="modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title"></h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body"></div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+          <a href="#" class="btn btn-primary" target="_blank" rel="noopener noreferrer">Читать полностью</a>
         </div>
       </div>
-      <div class="row">
-        <div class="col-sm-12 col-lg-8 mx-auto text-white">
-          <h1 class="display-4">RSS-Агрегатор</h1>
-          <p class="lead">Бесконечный поток информации прямиком в вашу голову</p>
-          <form class="rss-form text-body">
-            <div class="row">
-              <div class="col-sm-12 col-md-8 col-lg-10 mb-2">
-                <div class="form-floating">
-                  <input id="url-input" class="form-control" aria-label="url" name="url" placeholder="Ссылка RSS" autofocus autocomplete="off" required>
-                  <label for="url-input">Ссылка RSS</label>
-                </div>
-              </div>
-              <div class="col-sm-12 col-md-4 col-lg-2 d-grid d-lg-block mb-2">
-                <button type="submit" aria-label="add" name="add" class="btn btn-primary btn-lg h-100 px-sm-5">Добавить</button>
-              </div>
-            </div>
-          </form>
-          <p class="text-muted mb-0">Пример: https://lorem-rss.herokuapp.com/feed</p>
-          <p class="feedback small position-absolute"></p>
-        </div>
-      </div>
-    </section>
-    
-    <section class="container-fluid container-xxl p-5">
-      <div class="row">
-        <div class="posts col-sm-12 col-md-8">
-          <div class="card border-0 d-none">
-            <div class="card-body">
-              <h2 class="card-title h4">Посты</h2>
-            </div>
-            <ul class="list-group border-0 rounded-0"></ul>
-          </div>
-        </div>
-        <div class="feeds col-sm-12 col-md-4">
-          <div class="card border-0 d-none">
-            <div class="card-body">
-              <h2 class="card-title h4">Фиды</h2>
-            </div>
-            <ul class="list-group border-0 rounded-0"></ul>
-          </div>
-        </div>
-      </div>
-    </section>
-  </body>
+    </div>
+  </div>
+
+  <script type="module" src="./js/app.js"></script>
+</body>
 </html>
