@@ -78,7 +78,8 @@ const initView = (state) => {
       elements.feedback.classList.remove('text-success')
       elements.feedback.classList.add('text-danger')
       elements.feedback.textContent = formState.error || ''
-    } else {
+    }
+    else {
       elements.input.classList.remove('is-invalid')
     }
   }
@@ -90,7 +91,7 @@ const initView = (state) => {
       if (!state.uiState.viewedPosts.includes(postId)) {
         state.uiState.viewedPosts.push(postId)
       }
-      const post = state.posts.find((p) => p.id === postId)
+const post = state.posts.find(p => p.id === postId)
       if (post) {
         elements.modalTitle.textContent = post.title
         elements.modalBody.textContent = post.description
