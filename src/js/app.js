@@ -4,6 +4,7 @@ import initView from './initView.js'
 import fetchRss from './httpClient.js'
 import parseRss from './rssParser.js'
 import validate from './validate.js'
+
 const state = proxy({
   form: {
     valid: true,
@@ -26,17 +27,21 @@ const generateId = () => {
 
 const addFeed = (url, watchedState) => {
   return fetchRss(url)
-    .then(xmlString => parseRss(xmlString, url))
-    .then(data => {
+    .then((xmlString) => parseRss(xmlString, url))
+    .then((data) => {
       const feedId = generateId()
+      
       const newFeed = { ...data.feed, id: feedId, url }
       watchedState.feeds.push(newFeed)
-      const newPosts = data.posts.map(post => ({
+      
+      const newPosts = data.posts.map((post) => ({
         ...post,
         id: generateId(),
         feedId,
       }))
+      
       watchedState.posts = [...watchedState.posts, ...newPosts]
+      
       return data
     })
     .catch((err) => {
@@ -49,17 +54,19 @@ const addFeed = (url, watchedState) => {
 
 const app = () => {
   const watchedState = initView(state)
+  
   const form = document.querySelector('.rss-form')
   form.addEventListener('submit', (e) => {
     e.preventDefault()
     const formData = new FormData(e.target)
-    const url = formData.get('url');
+    const url = formData.get('url')
     
-    const existingUrls = watchedState.feeds.map(feed => feed.url
+    const existingUrls = watchedState.feeds.map((feed) => feed.url)
+    
     watchedState.form.status = 'sending'
-    
     watchedState.form.valid = true
     watchedState.form.error = null
+    
     validate(url, existingUrls)
       .then(() => addFeed(url, watchedState))
       .then(() => {
@@ -74,5 +81,4 @@ const app = () => {
 }
 
 app()
-
 export default app
