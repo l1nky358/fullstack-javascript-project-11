@@ -8,16 +8,16 @@ const generateId = () => {
 }
 
 const updatePosts = (watchedState) => {
-  const checkFeed = (feed) => {
+  const checkFeed = feed => {
     return fetchRss(feed.url)
-      .then((xmlString) => parseRss(xmlString, feed.url))
-      .then((data) => {
-        const existingPosts = watchedState.posts.filter((p) => p.feedId === feed.id)
-        const existingLinks = existingPosts.map((p) => p.link)
+      .then(xmlString => parseRss(xmlString, feed.url))
+      .then(data => {
+        const existingPosts = watchedState.posts.filter(p => p.feedId === feed.id)
+        const existingLinks = existingPosts.map(p => p.link)
 
         const newPosts = data.posts
-          .filter((post) => !existingLinks.includes(post.link))
-          .map((post) => ({
+          .filter(post => !existingLinks.includes(post.link))
+          .map(post => ({
             ...post,
             id: generateId(),
             feedId: feed.id,
@@ -27,7 +27,7 @@ const updatePosts = (watchedState) => {
           watchedState.posts = [...watchedState.posts, ...newPosts]
         }
       })
-      .catch((err) => {
+      .catch(err => {
         console.error('Ошибка обновления фида', feed.url, err)
       })
   }
