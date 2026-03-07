@@ -18,7 +18,7 @@ const initView = (state) => {
   const renderFeeds = (feeds) => {
     const feedsContainer = elements.feedsContainer;
     feedsContainer.innerHTML = '';
-
+    
     feeds.forEach((feed) => {
       const li = document.createElement('li');
       li.classList.add('list-group-item');
@@ -33,19 +33,19 @@ const initView = (state) => {
   const renderPosts = (posts) => {
     const postsContainer = elements.postsContainer;
     postsContainer.innerHTML = '';
-
+    
     posts.forEach((post) => {
       const li = document.createElement('li');
       li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-start');
-
+      
       const isViewed = state.uiState.viewedPosts.includes(post.id);
       const linkClass = isViewed ? 'fw-normal' : 'fw-bold';
-
+      
       li.innerHTML = `
         <a href="${post.link}" class="${linkClass}" target="_blank" rel="noopener noreferrer">${post.title}</a>
         <button type="button" class="btn btn-primary btn-sm preview-button" data-id="${post.id}">${i18next.t('buttons.preview')}</button>
       `;
-
+      
       postsContainer.appendChild(li);
     });
   };
@@ -89,14 +89,6 @@ const initView = (state) => {
 
   let modalInstance = null;
 
-  const getModalInstance = () => {
-    if (!modalInstance) {
-      modalInstance = new bootstrap.Modal(elements.modal);
-      console.log('Создан экземпляр Bootstrap модала');
-    }
-    return modalInstance;
-  };
-
   const watchedState = onChange(state, (path, value) => {
     switch (path) {
       case 'feeds':
@@ -112,15 +104,14 @@ const initView = (state) => {
             elements.modalTitle.textContent = post.title;
             elements.modalBody.textContent = post.description;
             elements.modalLink.href = post.link;
-
-            const modal = getModalInstance();
-
-            console.log(`Показать модал для поста: ${post.title}`);
-            modal.show();
+            
+            if (!modalInstance) {
+              modalInstance = new bootstrap.Modal(elements.modal);
+            }
+            modalInstance.show();
           }
         } else {
           if (modalInstance) {
-            console.log('Скрываем модал');
             modalInstance.hide();
           }
         }
@@ -139,17 +130,20 @@ const initView = (state) => {
     const button = e.target.closest('.preview-button');
     if (button) {
       const postId = Number(button.dataset.id);
-      if (!state.uiState.viewedPosts.includes(postId)) {
-        state.uiState.viewedPosts.push(postId);
+      
+      if (!watchedState.uiState.viewedPosts.includes(postId)) {
+        watchedState.uiState.viewedPosts.push(postId);
       }
-      state.uiState.modalPostId = postId;
+      
+      watchedState.uiState.modalPostId = postId;
     }
   });
 
   elements.modal.addEventListener('hidden.bs.modal', () => {
-    console.log('Модал скрыт, сброс modalPostId');
-    state.uiState.modalPostId = null;
+    watchedState.uiState.modalPostId = null;
   });
 
   return watchedState;
 };
+
+export default initView;
