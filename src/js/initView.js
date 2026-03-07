@@ -87,6 +87,8 @@ const initView = (state) => {
     }
   };
 
+  let modalInstance = null;
+
   const watchedState = onChange(state, (path, value) => {
     switch (path) {
       case 'feeds':
@@ -103,8 +105,14 @@ const initView = (state) => {
             elements.modalBody.textContent = post.description;
             elements.modalLink.href = post.link;
             
-            const modal = new bootstrap.Modal(elements.modal);
-            modal.show();
+            if (!modalInstance) {
+              modalInstance = new bootstrap.Modal(elements.modal);
+            }
+            modalInstance.show();
+          }
+        } else {
+          if (modalInstance) {
+            modalInstance.hide();
           }
         }
         break;
@@ -129,6 +137,10 @@ const initView = (state) => {
       
       watchedState.uiState.modalPostId = postId;
     }
+  });
+
+  elements.modal.addEventListener('hidden.bs.modal', () => {
+    watchedState.uiState.modalPostId = null;
   });
 
   return watchedState;
