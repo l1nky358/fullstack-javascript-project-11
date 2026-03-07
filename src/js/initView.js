@@ -1,4 +1,4 @@
-import onChange from 'on-change';
+import { subscribe } from 'valtio';
 import i18next from './locales.js';
 
 const initView = (state) => {
@@ -50,7 +50,9 @@ const initView = (state) => {
     });
   };
 
-  const renderForm = (formState) => {
+  const renderForm = () => {
+    const formState = state.form;
+    
     switch (formState.status) {
       case 'filling':
         elements.submitButton.disabled = false;
@@ -89,41 +91,29 @@ const initView = (state) => {
 
   let modalInstance = null;
 
-  const watchedState = onChange(state, (path, value) => {
-    switch (path) {
-      case 'feeds':
-        renderFeeds(value);
-        break;
-      case 'posts':
-        renderPosts(value);
-        break;
-      case 'uiState.modalPostId':
-        if (value) {
-          const post = state.posts.find(p => p.id === value);
-          if (post) {
-            elements.modalTitle.textContent = post.title;
-            elements.modalBody.textContent = post.description;
-            elements.modalLink.href = post.link;
-            
-            if (!modalInstance) {
-              modalInstance = new bootstrap.Modal(elements.modal);
-            }
-            modalInstance.show();
-          }
-        } else {
-          if (modalInstance) {
-            modalInstance.hide();
-          }
+  const renderModal = (postId) => {
+    if (postId) {
+      const post = state.posts.find(p => p.id === postId);
+      if (post) {
+        elements.modalTitle.textContent = post.title;
+        elements.modalBody.textContent = post.description;
+        elements.modalLink.href = post.link;
+        
+        if (!modalInstance) {
+          modalInstance = new bootstrap.Modal(elements.modal);
         }
-        break;
-      case 'form.status':
-      case 'form.valid':
-      case 'form.error':
-        renderForm(state.form);
-        break;
-      default:
-        break;
+        modalInstance.show();
+      }
+    } else if (modalInstance) {
+      modalInstance.hide();
     }
+  };
+
+  subscribe(state, () => {
+    renderFeeds(state.feeds);
+    renderPosts(state.posts);
+    renderForm();
+    renderModal(state.uiState.modalPostId);
   });
 
   elements.postsContainer.addEventListener('click', (e) => {
@@ -131,19 +121,19 @@ const initView = (state) => {
     if (button) {
       const postId = Number(button.dataset.id);
       
-      if (!watchedState.uiState.viewedPosts.includes(postId)) {
-        watchedState.uiState.viewedPosts.push(postId);
+      if (!state.uiState.viewedPosts.includes(postId)) {
+        state.uiState.viewedPosts.push(postId);
       }
       
-      watchedState.uiState.modalPostId = postId;
+      state.uiState.modalPostId = postId;
     }
   });
 
   elements.modal.addEventListener('hidden.bs.modal', () => {
-    watchedState.uiState.modalPostId = null;
+    state.uiState.modalPostId = null;
   });
 
-  return watchedState;
+  return state;
 };
 
 export default initView;
