@@ -1,10 +1,9 @@
-import { proxy } from 'valtio';
-import i18next from './locales.js';
-import initView from './initView.js';
-import fetchRss from './httpClient.js';
-import parseRss from './rssParser.js';
+import { proxy } from 'valtio'
+import i18next from './locales.js'
+import initView from './initView.js'
+import fetchRss from './httpClient.js'
+import parseRss from './rssParser.js'
 import validate from './validate.js';
-
 const state = proxy({
   form: {
     valid: true,
@@ -22,18 +21,17 @@ const state = proxy({
 let idCounter = 0;
 const generateId = () => {
   idCounter += 1;
-  return idCounter;
-};
+  return idCounter
+}
 
 const addFeed = (url, watchedState) => {
   return fetchRss(url)
     .then((xmlString) => parseRss(xmlString, url))
-    .then((data) => {
+    .then(data => {
       const feedId = generateId();
       
       const newFeed = { ...data.feed, id: feedId, url };
       watchedState.feeds.push(newFeed);
-      
       const newPosts = data.posts.map((post) => ({
         ...post,
         id: generateId(),
