@@ -4,7 +4,9 @@ const parseRss = (xmlString, url) => {
 
   const parserError = xmlDoc.querySelector('parsererror');
   if (parserError) {
-    throw new Error('errors.invalidRss');
+    const error = new Error('errors.invalidRss');
+    error.isParsingError = true;
+    throw error;
   }
 
   const feedTitle = xmlDoc.querySelector('channel > title')?.textContent || 'Без названия';
@@ -15,14 +17,12 @@ const parseRss = (xmlString, url) => {
     title: item.querySelector('title')?.textContent || 'Без названия',
     description: item.querySelector('description')?.textContent || 'Без описания',
     link: item.querySelector('link')?.textContent || '#',
-    pubDate: item.querySelector('pubDate')?.textContent || new Date().toISOString(),
   }));
 
   return {
     feed: {
       title: feedTitle,
       description: feedDescription,
-      url,
     },
     posts,
   };
