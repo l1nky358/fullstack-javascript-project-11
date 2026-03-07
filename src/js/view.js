@@ -89,33 +89,6 @@ const initView = (state) => {
     }
   };
 
-  let modalInstance = null;
-
-  const renderModal = (postId) => {
-    if (postId) {
-      const post = state.posts.find(p => p.id === postId);
-      if (post) {
-        elements.modalTitle.textContent = post.title;
-        elements.modalBody.textContent = post.description;
-        elements.modalLink.href = post.link;
-        
-        if (!modalInstance) {
-          modalInstance = new bootstrap.Modal(elements.modal);
-        }
-        modalInstance.show();
-      }
-    } else if (modalInstance) {
-      modalInstance.hide();
-    }
-  };
-
-  subscribe(state, () => {
-    renderFeeds(state.feeds);
-    renderPosts(state.posts);
-    renderForm();
-    renderModal(state.uiState.modalPostId);
-  });
-
   elements.postsContainer.addEventListener('click', (e) => {
     const button = e.target.closest('.preview-button');
     if (button) {
@@ -125,12 +98,26 @@ const initView = (state) => {
         state.uiState.viewedPosts.push(postId);
       }
       
-      state.uiState.modalPostId = postId;
+      const post = state.posts.find(p => p.id === postId);
+      if (post) {
+        elements.modalTitle.textContent = post.title;
+        elements.modalBody.textContent = post.description;
+        elements.modalLink.href = post.link;
+        
+        const modal = new bootstrap.Modal(elements.modal);
+        modal.show();
+        
+        elements.modal.addEventListener('hidden.bs.modal', () => {
+          modal.dispose();
+        }, { once: true });
+      }
     }
   });
 
-  elements.modal.addEventListener('hidden.bs.modal', () => {
-    state.uiState.modalPostId = null;
+  subscribe(state, () => {
+    renderFeeds(state.feeds);
+    renderPosts(state.posts);
+    renderForm();
   });
 
   return state;
