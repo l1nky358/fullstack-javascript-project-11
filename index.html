@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>RSS агрегатор</title>
-  <!-- Путь к стилям через src/ -->
   <link rel="stylesheet" href="./src/styles/main.scss">
 </head>
 <body>
@@ -13,7 +12,6 @@
       <div class="col-md-8 offset-md-2">
         <h1 class="display-4 text-center mb-4">RSS агрегатор</h1>
         
-        <!-- Форма добавления RSS -->
         <form class="rss-form">
           <div class="mb-3">
             <label for="url-input" class="form-label">Ссылка RSS</label>
@@ -32,13 +30,11 @@
           </div>
         </form>
 
-        <!-- Секция фидов -->
         <div class="feeds-section mt-4">
           <h2>Фиды</h2>
           <ul class="list-group feeds"></ul>
         </div>
 
-        <!-- Секция постов -->
         <div class="posts-section mt-4">
           <h2>Посты</h2>
           <ul class="list-group posts"></ul>
@@ -47,7 +43,6 @@
     </div>
   </div>
 
-  <!-- Модальное окно -->
   <div class="modal fade" id="modal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -64,7 +59,6 @@
     </div>
   </div>
 
-  <!-- Путь к js файлу через src/ -->
   <script type="module" src="./src/js/app.js"></script>
 </body>
 </html>
