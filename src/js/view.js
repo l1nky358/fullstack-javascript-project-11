@@ -106,10 +106,6 @@ const initView = (state) => {
         
         const modal = new bootstrap.Modal(elements.modal);
         modal.show();
-        
-        elements.modal.addEventListener('hidden.bs.modal', () => {
-          modal.dispose();
-        }, { once: true });
       }
     }
   });
