@@ -1,4 +1,4 @@
-import i18next from 'i18next';
+import i18next from 'i18next'
 
 i18next.init({
   lng: 'ru',
@@ -26,6 +26,6 @@ i18next.init({
       },
     },
   },
-});
+})
 
-export default i18next;
+export default i18next
