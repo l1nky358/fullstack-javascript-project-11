@@ -104,6 +104,7 @@ const initView = (state) => {
         elements.modalBody.textContent = post.description;
         elements.modalLink.href = post.link;
         
+        // Bootstrap доступен глобально через CDN
         const modal = new bootstrap.Modal(elements.modal);
         modal.show();
       }
