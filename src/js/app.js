@@ -1,4 +1,3 @@
-import 'bootstrap';
 import { proxy } from 'valtio';
 import i18next from './locales.js';
 import initView from './initView.js';
