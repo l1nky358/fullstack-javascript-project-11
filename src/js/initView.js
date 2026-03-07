@@ -39,7 +39,7 @@ const initView = (state) => {
       li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-start');
       
       const isViewed = state.uiState.viewedPosts.includes(post.id);
-      const linkClass = isViewed ? 'fw-normal' : 'fw-bold';
+      const linkClass = isViewed ? 'link-secondary' : 'fw-bold';
       
       li.innerHTML = `
         <a href="${post.link}" class="${linkClass}" target="_blank" rel="noopener noreferrer">${post.title}</a>
@@ -104,7 +104,6 @@ const initView = (state) => {
         elements.modalBody.textContent = post.description;
         elements.modalLink.href = post.link;
         
-        // Bootstrap доступен глобально через CDN
         const modal = new bootstrap.Modal(elements.modal);
         modal.show();
       }
