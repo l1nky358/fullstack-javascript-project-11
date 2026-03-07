@@ -50,6 +50,43 @@ const initView = (state) => {
     });
   };
 
+  const renderForm = (formState) => {
+    switch (formState.status) {
+      case 'filling':
+        elements.submitButton.disabled = false;
+        elements.input.disabled = false;
+        break;
+      case 'sending':
+        elements.submitButton.disabled = true;
+        elements.input.disabled = true;
+        break;
+      case 'finished':
+        elements.submitButton.disabled = false;
+        elements.input.disabled = false;
+        elements.input.value = '';
+        elements.feedback.classList.remove('text-danger');
+        elements.feedback.classList.add('text-success');
+        elements.feedback.textContent = i18next.t('success');
+        elements.input.focus();
+        break;
+      case 'failed':
+        elements.submitButton.disabled = false;
+        elements.input.disabled = false;
+        break;
+      default:
+        break;
+    }
+
+    if (formState.valid === false) {
+      elements.input.classList.add('is-invalid');
+      elements.feedback.classList.remove('text-success');
+      elements.feedback.classList.add('text-danger');
+      elements.feedback.textContent = formState.error || '';
+    } else {
+      elements.input.classList.remove('is-invalid');
+    }
+  };
+
   const watchedState = onChange(state, (path, value) => {
     switch (path) {
       case 'feeds':
@@ -70,6 +107,11 @@ const initView = (state) => {
             modal.show();
           }
         }
+        break;
+      case 'form.status':
+      case 'form.valid':
+      case 'form.error':
+        renderForm(state.form);
         break;
       default:
         break;
