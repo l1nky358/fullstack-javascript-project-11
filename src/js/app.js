@@ -26,12 +26,12 @@ const generateId = () => {
 }
 
 const addFeed = (url, watchedState) => fetchRss(url)
-  .then((xmlString) => parseRss(xmlString, url))
+  .then(xmlString => parseRss(xmlString, url))
   .then((data) => {
     const feedId = generateId()
     const newFeed = { ...data.feed, id: feedId, url }
     watchedState.feeds.push(newFeed)
-    const newPosts = data.posts.map((post) => ({
+    const newPosts = data.posts.map(post => ({
       ...post,
       id: generateId(),
       feedId,
@@ -53,7 +53,7 @@ const app = () => {
     e.preventDefault()
     const formData = new FormData(e.target)
     const url = formData.get('url')
-    const existingUrls = watchedState.feeds.map((feed) => feed.url)
+    const existingUrls = watchedState.feeds.map(feed => feed.url)
     watchedState.form.status = 'sending'
     watchedState.form.valid = true
     watchedState.form.error = null
