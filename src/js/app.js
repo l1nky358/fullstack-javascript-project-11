@@ -71,7 +71,6 @@ const app = () => {
       .then(() => addFeed(url, watchedState))
       .then(() => {
         watchedState.form.status = 'finished';
-        watchedState.form.valid = true;
       })
       .catch((err) => {
         watchedState.form.valid = false;
