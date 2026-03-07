@@ -57,6 +57,7 @@ const app = () => {
     
     const existingUrls = watchedState.feeds.map(feed => feed.url
     watchedState.form.status = 'sending'
+    
     watchedState.form.valid = true
     watchedState.form.error = null
     validate(url, existingUrls)
