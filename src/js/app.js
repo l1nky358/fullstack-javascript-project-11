@@ -27,7 +27,7 @@ const generateId = () => {
 
 const addFeed = (url, watchedState) => fetchRss(url)
   .then(xmlString => parseRss(xmlString))
-  .then(data => {
+  .then(data) => {
     const feedId = generateId()
     const newFeed = { ...data.feed, id: feedId, url }
     watchedState.feeds.push(newFeed)
@@ -39,7 +39,7 @@ const addFeed = (url, watchedState) => fetchRss(url)
     watchedState.posts = [...watchedState.posts, ...newPosts]
     return data
   })
-  .catch(err => {
+  .catch(err) => {
     if (err.message === 'errors.invalidRss') {
       throw new Error(i18next.t('errors.invalidRss'))
     }
@@ -49,7 +49,7 @@ const addFeed = (url, watchedState) => fetchRss(url)
 const app = () => {
   const watchedState = initView(state)
   const form = document.querySelector('.rss-form')
-  form.addEventListener('submit', e => {
+  form.addEventListener('submit', e) => {
     e.preventDefault()
     const formData = new FormData(e.target)
     const url = formData.get('url')
@@ -62,7 +62,7 @@ const app = () => {
       .then(() => {
         watchedState.form.status = 'finished'
       })
-      .catch(err => {
+      .catch(err) => {
         watchedState.form.valid = false
         watchedState.form.error = err.message
         watchedState.form.status = 'failed'
