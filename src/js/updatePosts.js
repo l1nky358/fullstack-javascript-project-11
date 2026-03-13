@@ -1,40 +1,30 @@
 import fetchRss from './httpClient.js'
 import parseRss from './rssParser.js'
 
-let idCounter = 0
-const generateId = () => {
-  idCounter += 1
-  return idCounter
-}
-
-const updatePosts = (watchedState) => {
+const updatePosts = (state) => {
   const checkFeed = feed => fetchRss(feed.url)
-    .then(xmlString => parseRss(xmlString, feed.url))
-    .then((data) => {
-      const existingPosts = watchedState.posts.filter(p => p.feedId === feed.id)
+    .then(xmlString => parseRss(xmlString))
+    .then(data => {
+      const existingPosts = state.posts.filter(p => p.feedId === feed.id)
       const existingLinks = existingPosts.map(p => p.link)
-
       const newPosts = data.posts
         .filter(post => !existingLinks.includes(post.link))
         .map(post => ({
           ...post,
-          id: generateId(),
+          id: Date.now() + Math.random(),
           feedId: feed.id,
         }))
-
       if (newPosts.length > 0) {
-        watchedState.posts = [...watchedState.posts, ...newPosts]
+        state.posts = [...state.posts, ...newPosts]
       }
     })
-    .catch((err) => {
-      console.error('Ошибка обновления фида', feed.url, err)
+    .catch(err => {
+      console.error('Update error:', err)
     })
 
-  const promises = watchedState.feeds.map(checkFeed)
-
-  return Promise.all(promises)
+  return Promise.all(state.feeds.map(checkFeed))
     .finally(() => {
-      setTimeout(() => updatePosts(watchedState), 5000)
+      setTimeout(() => updatePosts(state), 5000)
     })
 }
 
