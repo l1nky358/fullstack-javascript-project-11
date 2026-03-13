@@ -22,10 +22,15 @@ const initView = (state) => {
     feeds.forEach((feed) => {
       const li = document.createElement('li')
       li.classList.add('list-group-item')
-      li.innerHTML = `
-        <h3>${feed.title}</h3>
-        <p>${feed.description}</p>
-      `
+      
+      const titleEl = document.createElement('h3')
+      titleEl.textContent = feed.title
+      li.appendChild(titleEl)
+      
+      const descEl = document.createElement('p')
+      descEl.textContent = feed.description
+      li.appendChild(descEl)
+      
       feedsContainer.appendChild(li)
     })
   }
@@ -36,20 +41,33 @@ const initView = (state) => {
     posts.forEach((post) => {
       const li = document.createElement('li')
       li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-start')
+      
+      const linkEl = document.createElement('a')
+      linkEl.href = post.link
+      linkEl.target = '_blank'
+      linkEl.rel = 'noopener noreferrer'
+      linkEl.textContent = post.title
+      
       const isViewed = state.uiState.viewedPosts.includes(post.id)
-      const linkClass = isViewed ? 'link-secondary' : 'fw-bold'
-      li.innerHTML = `
-        <a href="${post.link}" class="${linkClass}" target="_blank" rel="noopener noreferrer">${post.title}</a>
-        <button type="button" class="btn btn-primary btn-sm preview-button" data-id="${post.id}">${i18next.t('buttons.preview')}</button>
-      `
+      linkEl.classList.add(isViewed ? 'link-secondary' : 'fw-bold')
+      
+      const buttonEl = document.createElement('button')
+      buttonEl.type = 'button'
+      buttonEl.classList.add('btn', 'btn-primary', 'btn-sm', 'preview-button')
+      buttonEl.dataset.id = post.id
+      buttonEl.textContent = i18next.t('buttons.preview')
+      
+      li.appendChild(linkEl)
+      li.appendChild(buttonEl)
       postsContainer.appendChild(li)
     })
   }
 
   const renderForm = () => {
     const formState = state.form
+    
     switch (formState.status) {
-      case 'filling':
+      case 'idle':
         elements.submitButton.disabled = false
         elements.input.disabled = false
         break
@@ -61,7 +79,7 @@ const initView = (state) => {
         elements.submitButton.disabled = false
         elements.input.disabled = false
         elements.input.value = ''
-        elements.feedback.classList.remove('text-danger')
+        elements.feedback.classList.remove('text-danger', 'text-success')
         elements.feedback.classList.add('text-success')
         elements.feedback.textContent = i18next.t('success')
         elements.input.focus()
@@ -73,13 +91,13 @@ const initView = (state) => {
       default:
         break
     }
+    
     if (formState.valid === false) {
       elements.input.classList.add('is-invalid')
       elements.feedback.classList.remove('text-success')
       elements.feedback.classList.add('text-danger')
       elements.feedback.textContent = formState.error || ''
-    }
-    else {
+    } else {
       elements.input.classList.remove('is-invalid')
     }
   }
@@ -98,6 +116,10 @@ const initView = (state) => {
         elements.modalLink.href = post.link
         const modal = new bootstrap.Modal(elements.modal)
         modal.show()
+        
+        elements.modal.addEventListener('hidden.bs.modal', () => {
+          modal.dispose()
+        }, { once: true })
       }
     }
   })
