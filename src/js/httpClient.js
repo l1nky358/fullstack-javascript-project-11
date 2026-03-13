@@ -7,13 +7,13 @@ const fetchRss = (url) => {
   requestUrl.searchParams.set('url', url)
 
   return axios.get(requestUrl.toString())
-    .then((response) => {
+    .then(response => {
       if (response.data && response.data.contents) {
         return response.data.contents
       }
       throw new Error('errors.invalidRss')
     })
-    .catch((error) => {
+    .catch(error => {
       if (error.message === 'errors.invalidRss') {
         throw error
       }
