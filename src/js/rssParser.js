@@ -10,7 +10,7 @@ const parseRss = (xmlString) => {
   const feedTitle = xmlDoc.querySelector('channel > title')?.textContent || 'Без названия'
   const feedDescription = xmlDoc.querySelector('channel > description')?.textContent || 'Без описания'
   const items = xmlDoc.querySelectorAll('item')
-  const posts = Array.from(items).map((item) => ({
+  const posts = Array.from(items).map(item => ({
     title: item.querySelector('title')?.textContent || 'Без названия',
     description: item.querySelector('description')?.textContent || 'Без описания',
     link: item.querySelector('link')?.textContent || '#',
