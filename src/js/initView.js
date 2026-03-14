@@ -83,13 +83,13 @@ const initView = (state) => {
       default:
         break
     }
-    
     if (formState.valid === false) {
       elements.input.classList.add('is-invalid')
       elements.feedback.classList.remove('text-success')
       elements.feedback.classList.add('text-danger')
       elements.feedback.textContent = formState.error || ''
-    } else {
+    }
+    else {
       elements.input.classList.remove('is-invalid')
     }
   }
