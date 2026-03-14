@@ -2,14 +2,14 @@ import fetchRss from './httpClient.js'
 import parseRss from './rssParser.js'
 
 const updatePosts = (state) => {
-  const checkFeed = (feed) => fetchRss(feed.url)
-    .then((xmlString) => parseRss(xmlString))
+  const checkFeed = feed => fetchRss(feed.url)
+    .then(xmlString => parseRss(xmlString))
     .then((data) => {
-      const existingPosts = state.posts.filter((p) => p.feedId === feed.id)
-      const existingLinks = existingPosts.map((p) => p.link)
+      const existingPosts = state.posts.filter(p => p.feedId === feed.id)
+      const existingLinks = existingPosts.map(p => p.link)
       const newPosts = data.posts
-        .filter((post) => !existingLinks.includes(post.link))
-        .map((post) => ({
+        .filter(post => !existingLinks.includes(post.link))
+        .map(post => ({
           ...post,
           id: Date.now() + Math.random(),
           feedId: feed.id,
