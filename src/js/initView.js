@@ -22,15 +22,12 @@ const initView = (state) => {
     feeds.forEach((feed) => {
       const li = document.createElement('li')
       li.classList.add('list-group-item')
-      
       const titleEl = document.createElement('h3')
       titleEl.textContent = feed.title
       li.appendChild(titleEl)
-      
       const descEl = document.createElement('p')
       descEl.textContent = feed.description
       li.appendChild(descEl)
-      
       feedsContainer.appendChild(li)
     })
   }
@@ -41,22 +38,18 @@ const initView = (state) => {
     posts.forEach((post) => {
       const li = document.createElement('li')
       li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-start')
-      
       const linkEl = document.createElement('a')
       linkEl.href = post.link
       linkEl.target = '_blank'
       linkEl.rel = 'noopener noreferrer'
       linkEl.textContent = post.title
-      
       const isViewed = state.uiState.viewedPosts.includes(post.id)
       linkEl.classList.add(isViewed ? 'link-secondary' : 'fw-bold')
-      
       const buttonEl = document.createElement('button')
       buttonEl.type = 'button'
       buttonEl.classList.add('btn', 'btn-primary', 'btn-sm', 'preview-button')
       buttonEl.dataset.id = post.id
       buttonEl.textContent = i18next.t('buttons.preview')
-      
       li.appendChild(linkEl)
       li.appendChild(buttonEl)
       postsContainer.appendChild(li)
@@ -65,7 +58,6 @@ const initView = (state) => {
 
   const renderForm = () => {
     const formState = state.form
-    
     switch (formState.status) {
       case 'idle':
         elements.submitButton.disabled = false
@@ -91,7 +83,6 @@ const initView = (state) => {
       default:
         break
     }
-    
     if (formState.valid === false) {
       elements.input.classList.add('is-invalid')
       elements.feedback.classList.remove('text-success')
@@ -109,14 +100,13 @@ const initView = (state) => {
       if (!state.uiState.viewedPosts.includes(postId)) {
         state.uiState.viewedPosts.push(postId)
       }
-      const post = state.posts.find(p => p.id === postId)
+      const post = state.posts.find((p) => p.id === postId)
       if (post) {
         elements.modalTitle.textContent = post.title
         elements.modalBody.textContent = post.description
         elements.modalLink.href = post.link
         const modal = new bootstrap.Modal(elements.modal)
         modal.show()
-        
         elements.modal.addEventListener('hidden.bs.modal', () => {
           modal.dispose()
         }, { once: true })
