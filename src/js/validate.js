@@ -15,7 +15,7 @@ const validate = (url, existingUrls) => {
   const schema = yup.string().required().url().notOneOf(existingUrls)
   return schema.validate(url)
     .then(() => null)
-    .catch(err => {
+    .catch((err) => {
       const messageKey = err.errors?.[0]?.key || 'errors.invalidUrl'
       return Promise.reject(new Error(i18next.t(messageKey)))
     })
