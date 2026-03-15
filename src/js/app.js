@@ -4,68 +4,113 @@ import initView from './initView.js'
 import fetchRss from './httpClient.js'
 import parseRss from './rssParser.js'
 import validate from './validate.js'
+import updatePosts from './updatePosts.js'
 
 const state = proxy({
   form: {
-    valid: null,
-    error: null,
-    status: 'idle',
+    validation: {
+      isValid: null,
+      error: null,
+    },
+    process: {
+      status: 'idle',
+    },
   },
   feeds: [],
   posts: [],
   uiState: {
-    viewedPosts: [],
+    viewedPosts: new Set(),
     modalPostId: null,
   },
 })
 
-let idCounter = 0
-const generateId = () => {
-  idCounter += 1
-  return idCounter
+const generateFeedId = (url) => {
+  let hash = 0
+  for (let i = 0; i < url.length; i++) {
+    const char = url.charCodeAt(i)
+    hash = ((hash << 5) - hash) + char
+    hash = hash & hash
+  }
+  return `feed_${Math.abs(hash)}`
+}
+
+const generatePostId = (feedId, postTitle) => {
+  const cleanTitle = postTitle.replace(/[^a-zA-Z0-9]/g, '_')
+  return `${feedId}_${cleanTitle}`
 }
 
 const addFeed = (url, watchedState) => fetchRss(url)
   .then(xmlString => parseRss(xmlString))
   .then((data) => {
-    const feedId = generateId()
-    const newFeed = { ...data.feed, id: feedId, url }
+    const feedId = generateFeedId(url)
+    const newFeed = { 
+      ...data.feed, 
+      id: feedId, 
+      url,
+      title: data.feed.title || 'Без названия',
+      description: data.feed.description || 'Без описания',
+    }
     watchedState.feeds.push(newFeed)
+    
     const newPosts = data.posts.map(post => ({
       ...post,
-      id: generateId(),
+      id: generatePostId(feedId, post.title),
       feedId,
+      title: post.title || 'Без названия',
+      description: post.description || 'Без описания',
+      link: post.link || '#',
     }))
+    
     watchedState.posts = [...watchedState.posts, ...newPosts]
+    updatePosts(watchedState)
+    
     return data
   })
   .catch((err) => {
     if (err.message === 'errors.invalidRss') {
       throw new Error(i18next.t('errors.invalidRss'))
     }
-    throw new Error(i18next.t('errors.network'))
+    if (err.message === 'errors.network') {
+      throw new Error(i18next.t('errors.network'))
+    }
+    throw err
   })
 
 const app = () => {
   const watchedState = initView(state)
   const form = document.querySelector('.rss-form')
+  
+  if (!form) {
+    console.error('Form not found!')
+    return
+  }
+  
   form.addEventListener('submit', (e) => {
     e.preventDefault()
     const formData = new FormData(e.target)
-    const url = formData.get('url')
+    const url = formData.get('url')?.trim()
+    
+    if (!url) {
+      watchedState.form.validation.isValid = false
+      watchedState.form.validation.error = i18next.t('errors.required')
+      return
+    }
+    
     const existingUrls = watchedState.feeds.map(feed => feed.url)
-    watchedState.form.status = 'sending'
-    watchedState.form.valid = true
-    watchedState.form.error = null
+    watchedState.form.process.status = 'sending'
+    watchedState.form.validation.isValid = true
+    watchedState.form.validation.error = null
+    
     validate(url, existingUrls)
       .then(() => addFeed(url, watchedState))
       .then(() => {
-        watchedState.form.status = 'finished'
+        watchedState.form.process.status = 'finished'
+        watchedState.form.validation.isValid = true
       })
       .catch((err) => {
-        watchedState.form.valid = false
-        watchedState.form.error = err.message
-        watchedState.form.status = 'failed'
+        watchedState.form.validation.isValid = false
+        watchedState.form.validation.error = err.message
+        watchedState.form.process.status = 'failed'
       })
   })
 }
