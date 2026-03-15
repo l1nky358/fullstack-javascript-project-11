@@ -43,15 +43,14 @@ const addFeed = (url, watchedState) => fetchRss(url)
   .then(xmlString => parseRss(xmlString))
   .then((data) => {
     const feedId = generateFeedId(url)
-    const newFeed = { 
-      ...data.feed, 
-      id: feedId, 
+    const newFeed = {
+      ...data.feed,
+      id: feedId,
       url,
       title: data.feed.title || 'Без названия',
       description: data.feed.description || 'Без описания',
     }
     watchedState.feeds.push(newFeed)
-    
     const newPosts = data.posts.map(post => ({
       ...post,
       id: generatePostId(feedId, post.title),
@@ -60,10 +59,8 @@ const addFeed = (url, watchedState) => fetchRss(url)
       description: post.description || 'Без описания',
       link: post.link || '#',
     }))
-    
     watchedState.posts = [...watchedState.posts, ...newPosts]
     updatePosts(watchedState)
-    
     return data
   })
   .catch((err) => {
@@ -79,7 +76,6 @@ const addFeed = (url, watchedState) => fetchRss(url)
 const app = () => {
   const watchedState = initView(state)
   const form = document.querySelector('.rss-form')
-  
   if (!form) {
     console.error('Form not found!')
     return
@@ -89,18 +85,15 @@ const app = () => {
     e.preventDefault()
     const formData = new FormData(e.target)
     const url = formData.get('url')?.trim()
-    
     if (!url) {
       watchedState.form.validation.isValid = false
       watchedState.form.validation.error = i18next.t('errors.required')
       return
     }
-    
     const existingUrls = watchedState.feeds.map(feed => feed.url)
     watchedState.form.process.status = 'sending'
     watchedState.form.validation.isValid = true
     watchedState.form.validation.error = null
-    
     validate(url, existingUrls)
       .then(() => addFeed(url, watchedState))
       .then(() => {
