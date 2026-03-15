@@ -80,7 +80,6 @@ const app = () => {
     console.error('Form not found!')
     return
   }
-  
   form.addEventListener('submit', (e) => {
     e.preventDefault()
     const formData = new FormData(e.target)
