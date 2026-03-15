@@ -1,5 +1,6 @@
 import { subscribe } from 'valtio'
 import i18next from './locales.js'
+import * as bootstrap from 'bootstrap'
 
 const initView = (state) => {
   const elements = {
@@ -24,91 +25,110 @@ const initView = (state) => {
   const renderFeeds = (feeds) => {
     const feedsContainer = elements.feedsContainer
     if (!feedsContainer) return
+    
     feedsContainer.innerHTML = ''
+    
     if (feeds.length === 0) {
-      const message = document.createElement('p')
-      message.textContent = i18next.t('noFeeds')
-      message.classList.add('text-muted', 'text-center')
-      feedsContainer.appendChild(message)
       return
     }
+    
     const card = document.createElement('div')
-    card.сlassList.add('card', 'border-0')
+    card.classList.add('card', 'border-0')
+    
     const cardBody = document.createElement('div')
     cardBody.classList.add('card-body')
+    
     const title = document.createElement('h2')
     title.classList.add('card-title', 'h4')
     title.textContent = i18next.t('feeds')
     cardBody.appendChild(title)
     card.appendChild(cardBody)
+    
     const listGroup = document.createElement('ul')
     listGroup.classList.add('list-group', 'border-0', 'rounded-0')
+    
     feeds.forEach((feed) => {
       const li = document.createElement('li')
       li.classList.add('list-group-item', 'border-0', 'border-end-0')
+      
       const feedTitle = document.createElement('h3')
       feedTitle.classList.add('h6', 'm-0')
       feedTitle.textContent = feed.title
+      
       const feedDesc = document.createElement('p')
       feedDesc.classList.add('m-0', 'small', 'text-black-50')
       feedDesc.textContent = feed.description
+      
       li.appendChild(feedTitle)
       li.appendChild(feedDesc)
       listGroup.appendChild(li)
     })
+    
     card.appendChild(listGroup)
     feedsContainer.appendChild(card)
   }
 
   const renderPosts = (posts) => {
     const postsContainer = elements.postsContainer
-    if (!postsContainer) return 
+    if (!postsContainer) return
+    
     postsContainer.innerHTML = ''
+    
     if (posts.length === 0) {
-      const message = document.createElement('p')
-      message.textContent = i18next.t('noPosts')
-      message.classList.add('text-muted', 'text-center')
-      postsContainer.appendChild(message)
       return
     }
+    
     const card = document.createElement('div')
     card.classList.add('card', 'border-0')
+    
     const cardBody = document.createElement('div')
     cardBody.classList.add('card-body')
+    
     const title = document.createElement('h2')
     title.classList.add('card-title', 'h4')
     title.textContent = i18next.t('posts')
     cardBody.appendChild(title)
-    card.appendChild(cardBody) 
+    card.appendChild(cardBody)
+    
     const listGroup = document.createElement('ul')
     listGroup.classList.add('list-group', 'border-0', 'rounded-0')
+    
     posts.forEach((post) => {
       const li = document.createElement('li')
       li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-start', 'border-0', 'border-end-0')
+      
       const linkEl = document.createElement('a')
       linkEl.href = post.link
       linkEl.target = '_blank'
       linkEl.rel = 'noopener noreferrer'
       linkEl.textContent = post.title
-      const isViewed = state.uiState.viewedPosts.has(post.id)
-      linkEl.classList.add(isViewed ? 'link-secondary' : 'fw-bold')
+      linkEl.classList.add('fw-bold')
+      
+      if (state.uiState.viewedPosts.has(post.id)) {
+        linkEl.classList.remove('fw-bold')
+        linkEl.classList.add('link-secondary', 'fw-normal')
+      }
+      
       const buttonEl = document.createElement('button')
       buttonEl.type = 'button'
-      buttonEl.classList.add('btn', 'btn-outline-primary', 'btn-sm')
+      buttonEl.classList.add('btn', 'btn-primary', 'btn-sm')
       buttonEl.dataset.id = post.id
       buttonEl.dataset.bsToggle = 'modal'
       buttonEl.dataset.bsTarget = '#modal'
       buttonEl.textContent = i18next.t('buttons.preview')
+      
       li.appendChild(linkEl)
       li.appendChild(buttonEl)
       listGroup.appendChild(li)
     })
+    
     card.appendChild(listGroup)
     postsContainer.appendChild(card)
   }
 
   const renderForm = () => {
     const formState = state.form
+    
     switch (formState.process.status) {
       case 'sending':
         elements.submitButton.disabled = true
@@ -123,6 +143,7 @@ const initView = (state) => {
         elements.input.focus()
         setTimeout(() => {
           state.form.process.status = 'idle'
+          state.form.validation.isValid = null
         }, 2000)
         break
       case 'failed':
@@ -134,6 +155,7 @@ const initView = (state) => {
       default:
         break
     }
+    
     if (formState.validation.isValid === false) {
       elements.input.classList.add('is-invalid')
       elements.feedback.classList.remove('text-success')
@@ -156,13 +178,22 @@ const initView = (state) => {
   elements.postsContainer.addEventListener('click', (e) => {
     const button = e.target.closest('[data-bs-target="#modal"]')
     if (!button) return
+    
     const postId = button.dataset.id
     const post = state.posts.find(p => p.id === postId)
+    
     if (!post) return
+    
     if (!state.uiState.viewedPosts.has(postId)) {
       state.uiState.viewedPosts.add(postId)
-      renderPosts(state.posts)
+      
+      const link = button.closest('li')?.querySelector('a')
+      if (link) {
+        link.classList.remove('fw-bold')
+        link.classList.add('link-secondary', 'fw-normal')
+      }
     }
+    
     elements.modalTitle.textContent = post.title
     elements.modalBody.textContent = post.description
     elements.modalLink.href = post.link
