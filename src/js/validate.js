@@ -16,7 +16,7 @@ const validate = (url, existingUrls) => {
     .required()
     .url()
     .notOneOf(existingUrls)
-  
+
   return schema.validate(url)
     .then(() => null)
     .catch((err) => {
