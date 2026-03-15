@@ -3,12 +3,12 @@ import parseRss from './rssParser.js'
 import i18next from './locales.js'
 
 const updatePosts = (state) => {
-  const checkFeed = (feed) => fetchRss(feed.url)
+  const checkFeed = feed => fetchRss(feed.url)
     .then(xmlString => parseRss(xmlString))
     .then((data) => {
       const existingPosts = state.posts.filter(p => p.feedId === feed.id)
       const existingLinks = new Set(existingPosts.map(p => p.link))
-      
+
       const newPosts = data.posts
         .filter(post => !existingLinks.has(post.link))
         .map(post => ({
@@ -19,10 +19,10 @@ const updatePosts = (state) => {
           description: post.description || 'Без описания',
           link: post.link || '#',
         }))
-      
+
       if (newPosts.length > 0) {
         state.posts = [...state.posts, ...newPosts]
-        
+
         const notification = document.createElement('div')
         notification.classList.add('alert', 'alert-info', 'alert-dismissible', 'fade', 'show', 'position-fixed', 'top-0', 'end-0', 'm-3')
         notification.setAttribute('role', 'alert')
@@ -31,7 +31,7 @@ const updatePosts = (state) => {
           <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         `
         document.body.appendChild(notification)
-        
+
         setTimeout(() => {
           notification.remove()
         }, 5000)
