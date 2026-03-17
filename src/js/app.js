@@ -4,7 +4,6 @@ import initView from './initView.js'
 import fetchRss from './httpClient.js'
 import parseRss from './rssParser.js'
 import validate from './validate.js'
-import updatePosts from './updatePosts.js'
 
 const state = proxy({
   form: {
@@ -23,7 +22,11 @@ const state = proxy({
   },
 })
 
-const generateId = () => Date.now().toString(36) + Math.random().toString(36).substring(2)
+let idCounter = 0
+const generateId = () => {
+  idCounter += 1
+  return idCounter
+}
 
 const addFeed = (url, watchedState) => fetchRss(url)
   .then(xmlString => parseRss(xmlString))
@@ -32,21 +35,20 @@ const addFeed = (url, watchedState) => fetchRss(url)
     const newFeed = {
       id: feedId,
       url,
-      title: data.feed.title || 'Без названия',
-      description: data.feed.description || 'Без описания',
+      title: data.feed.title,
+      description: data.feed.description,
     }
-    watchedState.feeds = [...watchedState.feeds, newFeed]
-
+    watchedState.feeds.push(newFeed)
+    
     const newPosts = data.posts.map(post => ({
       id: generateId(),
       feedId,
-      title: post.title || 'Без названия',
-      description: post.description || 'Без описания',
-      link: post.link || '#',
+      title: post.title,
+      description: post.description,
+      link: post.link,
     }))
     
-    watchedState.posts = [...watchedState.posts, ...newPosts]
-    
+    watchedState.posts.push(...newPosts)
     return data
   })
   .catch((err) => {
@@ -60,12 +62,10 @@ const app = () => {
   const watchedState = initView(state)
   const form = document.querySelector('.rss-form')
   
-  if (!form) return
-  
   form.addEventListener('submit', (e) => {
     e.preventDefault()
     const formData = new FormData(e.target)
-    const url = formData.get('url')?.trim()
+    const url = formData.get('url')
     
     if (!url) {
       watchedState.form.validation.isValid = false
@@ -82,7 +82,6 @@ const app = () => {
       .then(() => addFeed(url, watchedState))
       .then(() => {
         watchedState.form.process.status = 'finished'
-        document.querySelector('#url-input').value = ''
       })
       .catch((err) => {
         watchedState.form.validation.isValid = false
