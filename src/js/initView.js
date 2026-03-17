@@ -22,7 +22,7 @@ const initView = (state) => {
     container.innerHTML = ''
     
     const ul = document.createElement('ul')
-    ul.classList.add('list-group')
+    ul.classList.add('list-group', 'list-group-flush')
     
     feeds.forEach((feed) => {
       const li = document.createElement('li')
@@ -48,19 +48,26 @@ const initView = (state) => {
     
     container.innerHTML = ''
     
-    const ul = document.createElement('ul')
-    ul.classList.add('list-group')
+    const postsDiv = document.createElement('div')
+    postsDiv.classList.add('list-group')
     
     posts.forEach((post) => {
-      const li = document.createElement('li')
-      li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-start')
+      const postItem = document.createElement('div')
+      postItem.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center')
       
       const link = document.createElement('a')
       link.href = post.link
       link.target = '_blank'
       link.rel = 'noopener noreferrer'
       link.textContent = post.title
-      link.classList.add(state.uiState.viewedPosts.has(post.id) ? 'link-secondary' : 'fw-bold')
+      link.dataset.id = post.id
+      
+      if (state.uiState.viewedPosts.has(post.id)) {
+        link.classList.add('link-secondary')
+      } 
+      else {
+        link.classList.add('fw-bold')
+      }
       
       const button = document.createElement('button')
       button.type = 'button'
@@ -70,12 +77,12 @@ const initView = (state) => {
       button.dataset.bsTarget = '#modal'
       button.textContent = i18next.t('buttons.preview')
       
-      li.appendChild(link)
-      li.appendChild(button)
-      ul.appendChild(li)
+      postItem.appendChild(link)
+      postItem.appendChild(button)
+      postsDiv.appendChild(postItem)
     })
     
-    container.appendChild(ul)
+    container.appendChild(postsDiv)
   }
 
   const renderForm = () => {
@@ -84,7 +91,7 @@ const initView = (state) => {
     if (formState.process.status === 'sending') {
       elements.submitButton.disabled = true
       elements.input.disabled = true
-    }
+    } 
     else {
       elements.submitButton.disabled = false
       elements.input.disabled = false
@@ -95,7 +102,7 @@ const initView = (state) => {
       elements.feedback.classList.add('text-danger')
       elements.feedback.classList.remove('text-success')
       elements.feedback.textContent = formState.validation.error
-    }
+    } 
     else if (formState.process.status === 'finished') {
       elements.input.classList.remove('is-invalid')
       elements.feedback.classList.add('text-success')
@@ -106,7 +113,7 @@ const initView = (state) => {
         state.form.process.status = 'idle'
         elements.feedback.textContent = ''
       }, 2000)
-    }
+    } 
     else {
       elements.input.classList.remove('is-invalid')
       elements.feedback.classList.remove('text-danger', 'text-success')
@@ -115,26 +122,37 @@ const initView = (state) => {
   }
 
   elements.postsContainer.addEventListener('click', (e) => {
-    const button = e.target.closest('.btn-primary')
-    if (!button || !button.dataset.id) return
+    const target = e.target
     
-    const postId = button.dataset.id
-    const post = state.posts.find(p => p.id === postId)
-    
-    if (!post) return
-    
-    if (!state.uiState.viewedPosts.has(postId)) {
-      state.uiState.viewedPosts.add(postId)
-      const link = button.closest('li')?.querySelector('a')
-      if (link) {
-        link.classList.remove('fw-bold')
-        link.classList.add('link-secondary')
+    if (target.tagName === 'A' && target.dataset.id) {
+      const postId = target.dataset.id
+      if (!state.uiState.viewedPosts.has(postId)) {
+        state.uiState.viewedPosts.add(postId)
+        target.classList.remove('fw-bold')
+        target.classList.add('link-secondary')
       }
     }
     
-    elements.modalTitle.textContent = post.title
-    elements.modalBody.textContent = post.description
-    elements.modalLink.href = post.link
+    const button = target.closest('.btn-primary')
+    if (button && button.dataset.id) {
+      const postId = button.dataset.id
+      const post = state.posts.find(p => p.id === postId)
+      
+      if (!post) return
+      
+      if (!state.uiState.viewedPosts.has(postId)) {
+        state.uiState.viewedPosts.add(postId)
+        const link = button.closest('.list-group-item')?.querySelector('a')
+        if (link) {
+          link.classList.remove('fw-bold')
+          link.classList.add('link-secondary')
+        }
+      }
+      
+      elements.modalTitle.textContent = post.title
+      elements.modalBody.textContent = post.description
+      elements.modalLink.href = post.link
+    }
   })
 
   subscribe(state, () => {
