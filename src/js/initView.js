@@ -65,7 +65,7 @@ const initView = (state) => {
       
       const button = document.createElement('button')
       button.type = 'button'
-      button.classList.add('btn', 'btn-primary', 'btn-sm', 'ms-2')
+      button.classList.add('btn', 'btn-primary', 'btn-sm', 'float-end')
       button.dataset.id = post.id
       button.dataset.bsToggle = 'modal'
       button.dataset.bsTarget = '#modal'
