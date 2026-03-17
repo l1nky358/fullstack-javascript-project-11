@@ -44,7 +44,6 @@ const initView = (state) => {
     container.innerHTML = ''
     
     posts.forEach((post) => {
-      // Ссылка должна быть прямым потомком .posts
       const link = document.createElement('a')
       link.href = post.link
       link.target = '_blank'
