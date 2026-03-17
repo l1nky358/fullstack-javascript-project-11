@@ -4,6 +4,7 @@ import initView from './initView.js'
 import fetchRss from './httpClient.js'
 import parseRss from './rssParser.js'
 import validate from './validate.js'
+import updatePosts from './updatePosts.js'
 
 const state = proxy({
   form: {
@@ -19,11 +20,14 @@ const state = proxy({
   posts: [],
   uiState: {
     viewedPosts: new Set(),
-    modalPostId: null,
   },
 })
 
-const generateId = () => crypto.randomUUID
+let idCounter = 0
+const generateId = () => {
+  idCounter += 1
+  return String(idCounter)
+}
 
 const addFeed = (url, watchedState) => fetchRss(url)
   .then(xmlString => parseRss(xmlString))
@@ -32,20 +36,23 @@ const addFeed = (url, watchedState) => fetchRss(url)
     const newFeed = {
       id: feedId,
       url,
-      title: data.feed.title,
-      description: data.feed.description,
+      title: data.feed.title || 'Без названия',
+      description: data.feed.description || 'Без описания',
     }
     watchedState.feeds.push(newFeed)
     
     const newPosts = data.posts.map(post => ({
       id: generateId(),
       feedId,
-      title: post.title,
-      description: post.description,
-      link: post.link,
+      title: post.title || 'Без названия',
+      description: post.description || 'Без описания',
+      link: post.link || '#',
     }))
     
-    watchedState.posts.push(...newPosts)
+    watchedState.posts = [...watchedState.posts, ...newPosts]
+    
+    setTimeout(() => updatePosts(watchedState), 5000)
+    
     return data
   })
   .catch((err) => {
@@ -59,10 +66,12 @@ const app = () => {
   const watchedState = initView(state)
   const form = document.querySelector('.rss-form')
   
+  if (!form) return
+  
   form.addEventListener('submit', (e) => {
     e.preventDefault()
     const formData = new FormData(e.target)
-    const url = formData.get('url')
+    const url = formData.get('url')?.trim()
     
     if (!url) {
       watchedState.form.validation.isValid = false
