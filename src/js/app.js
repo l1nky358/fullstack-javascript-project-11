@@ -19,14 +19,11 @@ const state = proxy({
   posts: [],
   uiState: {
     viewedPosts: new Set(),
+    modalPostId: null,
   },
 })
 
-let idCounter = 0
-const generateId = () => {
-  idCounter += 1
-  return idCounter
-}
+const generateId = () => crypto.randomUUID
 
 const addFeed = (url, watchedState) => fetchRss(url)
   .then(xmlString => parseRss(xmlString))
