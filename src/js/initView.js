@@ -21,26 +21,25 @@ const initView = (state) => {
     
     container.innerHTML = ''
     
+    const ul = document.createElement('ul')
+    ul.classList.add('list-group')
+    
     feeds.forEach((feed) => {
-      const feedEl = document.createElement('div')
-      feedEl.classList.add('card', 'mb-3')
-      
-      const cardBody = document.createElement('div')
-      cardBody.classList.add('card-body')
+      const li = document.createElement('li')
+      li.classList.add('list-group-item')
       
       const title = document.createElement('h3')
-      title.classList.add('card-title', 'h5')
       title.textContent = feed.title
       
-      const description = document.createElement('p')
-      description.classList.add('card-text', 'small', 'text-muted')
-      description.textContent = feed.description
+      const desc = document.createElement('p')
+      desc.textContent = feed.description
       
-      cardBody.appendChild(title)
-      cardBody.appendChild(description)
-      feedEl.appendChild(cardBody)
-      container.appendChild(feedEl)
+      li.appendChild(title)
+      li.appendChild(desc)
+      ul.appendChild(li)
     })
+    
+    container.appendChild(ul)
   }
 
   const renderPosts = (posts) => {
@@ -49,33 +48,34 @@ const initView = (state) => {
     
     container.innerHTML = ''
     
+    const ul = document.createElement('ul')
+    ul.classList.add('list-group')
+    
     posts.forEach((post) => {
-      const postEl = document.createElement('div')
-      postEl.classList.add('card', 'mb-2')
-      
-      const cardBody = document.createElement('div')
-      cardBody.classList.add('card-body', 'p-2')
+      const li = document.createElement('li')
+      li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-start')
       
       const link = document.createElement('a')
       link.href = post.link
       link.target = '_blank'
       link.rel = 'noopener noreferrer'
       link.textContent = post.title
-      link.classList.add(state.uiState.viewedPosts.has(post.id) ? 'text-secondary' : 'fw-bold')
+      link.classList.add(state.uiState.viewedPosts.has(post.id) ? 'link-secondary' : 'fw-bold')
       
       const button = document.createElement('button')
       button.type = 'button'
-      button.classList.add('btn', 'btn-primary', 'btn-sm', 'float-end')
+      button.classList.add('btn', 'btn-primary', 'btn-sm')
       button.dataset.id = post.id
       button.dataset.bsToggle = 'modal'
       button.dataset.bsTarget = '#modal'
       button.textContent = i18next.t('buttons.preview')
       
-      cardBody.appendChild(link)
-      cardBody.appendChild(button)
-      postEl.appendChild(cardBody)
-      container.appendChild(postEl)
+      li.appendChild(link)
+      li.appendChild(button)
+      ul.appendChild(li)
     })
+    
+    container.appendChild(ul)
   }
 
   const renderForm = () => {
@@ -84,7 +84,8 @@ const initView = (state) => {
     if (formState.process.status === 'sending') {
       elements.submitButton.disabled = true
       elements.input.disabled = true
-    } else {
+    }
+    else {
       elements.submitButton.disabled = false
       elements.input.disabled = false
     }
@@ -100,6 +101,7 @@ const initView = (state) => {
       elements.feedback.classList.add('text-success')
       elements.feedback.classList.remove('text-danger')
       elements.feedback.textContent = i18next.t('success')
+      elements.input.value = ''
       setTimeout(() => {
         state.form.process.status = 'idle'
         elements.feedback.textContent = ''
@@ -113,8 +115,8 @@ const initView = (state) => {
   }
 
   elements.postsContainer.addEventListener('click', (e) => {
-    const button = e.target.closest('[data-bs-target="#modal"]')
-    if (!button) return
+    const button = e.target.closest('.btn-primary')
+    if (!button || !button.dataset.id) return
     
     const postId = button.dataset.id
     const post = state.posts.find(p => p.id === postId)
@@ -123,7 +125,11 @@ const initView = (state) => {
     
     if (!state.uiState.viewedPosts.has(postId)) {
       state.uiState.viewedPosts.add(postId)
-      renderPosts(state.posts)
+      const link = button.closest('li')?.querySelector('a')
+      if (link) {
+        link.classList.remove('fw-bold')
+        link.classList.add('link-secondary')
+      }
     }
     
     elements.modalTitle.textContent = post.title
@@ -137,7 +143,6 @@ const initView = (state) => {
     renderForm()
   })
 
-  renderForm()
   return state
 }
 
